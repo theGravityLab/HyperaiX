@@ -5,7 +5,7 @@ namespace HyperaiX.Abstractions.Actions
 {
     public class GroupMessageActionArgs: GenericActionArgs
     {
-        public Group Group { get; set; }
+        public long GroupId { get; set; }
         public MessageChain Message { get; set; }
     }
 }
