@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace HyperaiX.Abstractions.Relations
 {
-    public record Group: RelationModel
+    public record Group: Contact
     {
         public string Name { get; init; }
         public Lazy<Member> Owner { get; init; }

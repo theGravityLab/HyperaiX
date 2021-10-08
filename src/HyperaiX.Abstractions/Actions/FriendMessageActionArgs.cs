@@ -1,11 +1,11 @@
 using HyperaiX.Abstractions.Messages;
 using HyperaiX.Abstractions.Relations;
 
-namespace HyperaiX.Abstractions.Events
+namespace HyperaiX.Abstractions.Actions
 {
-    public class FriendMessageEventArgs: GenericEventArgs
+    public class FriendMessageActionArgs: GenericActionArgs
     {
-        public Friend Sender { get; set; }
+        public Friend Friend { get; set; }
         public MessageChain Message { get; set; }
     }
 }
