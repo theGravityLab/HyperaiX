@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using HyperaiX.Abstractions.Messages.ConcreteModels;
 
 namespace HyperaiX.Abstractions.Messages
 {
@@ -22,5 +23,11 @@ namespace HyperaiX.Abstractions.Messages
         };
 
         public override int GetHashCode() => InnerElements.GetHashCode();
+
+        public override string ToString() => string.Join("", InnerElements.Select(x => x switch
+        {
+            Plain plain => plain.Text,
+            _ => x.ToString()
+        }));
     }
 }
