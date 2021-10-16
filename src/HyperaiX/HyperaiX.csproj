@@ -2,21 +2,26 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
+        <RepositoryUrl>https://github.com/theGravityLab/HyperaiX</RepositoryUrl>
+        <Authors>GravityLab, Chien Zhang</Authors>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Description>HyperaiX</Description>
+        <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="GitVersion.MSBuild" Version="5.7.0">
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        <PrivateAssets>all</PrivateAssets>
-      </PackageReference>
-      <PackageReference Include="IBuilder" Version="0.1.0" />
-      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+        <PackageReference Include="GitVersion.MSBuild" Version="5.7.0">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="IBuilder" Version="0.1.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HyperaiX.Abstractions\HyperaiX.Abstractions.csproj" />
+        <ProjectReference Include="..\HyperaiX.Abstractions\HyperaiX.Abstractions.csproj"/>
     </ItemGroup>
 
 </Project>
