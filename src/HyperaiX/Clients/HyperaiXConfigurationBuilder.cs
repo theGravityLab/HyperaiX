@@ -31,12 +31,12 @@ namespace HyperaiX.Clients
                 var exception =
                     new InvalidOperationException($"{type} has no required method Execute[Async](GenericEventArgs args, Action next)");
                 var execute = type.GetMethod("Execute") ?? type.GetMethod("ExecuteAsync") ?? throw exception;
-                if(!execute.GetParameters().Select(x => x.ParameterType)
+                if (!execute.GetParameters().Select(x => x.ParameterType)
                     .SequenceEqual(new[] { typeof(GenericEventArgs), typeof(Action) })) throw exception;
-                
-                
+
+
                 var middleware = ActivatorUtilities.CreateInstance(pvd, type);
-                Action nextDelegate = () => next(evt, pvd) ;
+                Action nextDelegate = () => next(evt, pvd);
                 if (execute.GetCustomAttribute<AsyncStateMachineAttribute>() != null)
                 {
                     var task = execute.Invoke(middleware, new object[] { evt, nextDelegate }) as Task;
@@ -46,7 +46,7 @@ namespace HyperaiX.Clients
                 {
                     execute.Invoke(middleware, new object[] { evt, nextDelegate });
                 }
-                
+
             });
         }
 
@@ -55,9 +55,15 @@ namespace HyperaiX.Clients
             // weave pipeline
             Action<GenericEventArgs, IServiceProvider> pipeline = (args, provider) => { };
 
-            foreach (var middleware in Enumerable.Reverse(middlewares))
+            // a, b, c => c, b, a
+            // c => c(), empty | pipeline() => c() -> empty()
+            // b => b(), c | pipeline() => b() -> c() -> empty()
+            // a => a(), b | pipeline() => a() -> b() -> c() -> empty()
+
+            foreach (var m in Enumerable.Reverse(middlewares))
             {
-                pipeline = (evt, provider) => middleware(evt, provider, pipeline);
+                var _pipeline = pipeline;
+                pipeline = (evt, provider) => m(evt, provider, _pipeline);
             }
 
             return new HyperaiXConfiguration()

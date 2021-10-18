@@ -14,7 +14,7 @@ namespace HyperaiX
             
             services
                 .AddSingleton( provider => builder.Build())
-                .AddScoped<HyperaiXClient>();
+                .AddHostedService<HyperaiXServer>();
             
             return services;
         }
