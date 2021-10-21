@@ -1,6 +1,6 @@
 namespace HyperaiX.Abstractions.Messages.ConcreteModels
 {
-    public sealed record Quote: MessageElement
+    public sealed record Quote : MessageElement
     {
         public Quote(long messageId)
         {

@@ -1,5 +1,6 @@
 using System;
 using HyperaiX.Clients;
+using HyperaiX.Units;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HyperaiX
@@ -11,14 +12,25 @@ namespace HyperaiX
         {
             var builder = new HyperaiXConfigurationBuilder();
             configure?.Invoke(builder);
-            
+
             services
-                .AddSingleton( provider => builder.Build())
+                .AddSingleton(provider => builder.Build())
                 .AddHostedService<HyperaiXServer>();
-            
+
             return services;
         }
 
-        public static IServiceCollection AddHyperaiX(this IServiceCollection services) => AddHyperaiX(services, null);
+        public static IServiceCollection AddHyperaiX(this IServiceCollection services)
+        {
+            return AddHyperaiX(services, null);
+        }
+
+        public static IServiceCollection AddUnits(this IServiceCollection services, Action<UnitMiddlewareConfigurationBuilder> configure)
+        {
+            var builder = new UnitMiddlewareConfigurationBuilder();
+            configure?.Invoke(builder);
+            services.AddSingleton(builder.Build());
+            return services;
+        }
     }
 }

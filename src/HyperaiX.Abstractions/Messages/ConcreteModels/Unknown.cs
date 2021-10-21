@@ -1,6 +1,6 @@
 namespace HyperaiX.Abstractions.Messages.ConcreteModels
 {
-    public sealed record Unknown: MessageElement
+    public sealed record Unknown : MessageElement
     {
         public Unknown(object data)
         {

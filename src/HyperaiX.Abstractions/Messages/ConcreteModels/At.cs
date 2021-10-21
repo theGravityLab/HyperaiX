@@ -1,6 +1,6 @@
 namespace HyperaiX.Abstractions.Messages.ConcreteModels
 {
-    public sealed record At: MessageElement
+    public sealed record At : MessageElement
     {
         public At(long identity)
         {

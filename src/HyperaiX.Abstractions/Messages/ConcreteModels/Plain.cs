@@ -1,6 +1,6 @@
 namespace HyperaiX.Abstractions.Messages.ConcreteModels
 {
-    public sealed record Plain: MessageElement
+    public sealed record Plain : MessageElement
     {
         public Plain(string text)
         {

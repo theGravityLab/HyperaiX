@@ -8,7 +8,8 @@ namespace HyperaiX.Abstractions.Relations
         Administrator,
         Owner
     }
-    public record Member: User
+
+    public record Member : User
     {
         public string DisplayName { get; init; }
         public GroupRole Role { get; init; } = GroupRole.Member;

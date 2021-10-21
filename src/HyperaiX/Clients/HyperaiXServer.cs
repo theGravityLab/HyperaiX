@@ -1,25 +1,22 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using HyperaiX.Abstractions.Actions;
-using HyperaiX.Abstractions.Events;
-using HyperaiX.Abstractions.Receipts;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace HyperaiX.Clients
 {
-    public class HyperaiXServer: IHostedService
+    public class HyperaiXServer : IHostedService
     {
-        private readonly HyperaiXConfiguration _configuration;
-        private readonly IServiceProvider _provider;
         private readonly IApiClient _client;
+        private readonly HyperaiXConfiguration _configuration;
         private readonly ILogger _logger;
+        private readonly IServiceProvider _provider;
 
         private readonly CancellationTokenSource tokenSource = new();
 
-        public HyperaiXServer(IServiceProvider provider, HyperaiXConfiguration configuration, IApiClient client, ILogger<HyperaiXServer> logger)
+        public HyperaiXServer(IServiceProvider provider, HyperaiXConfiguration configuration, IApiClient client,
+            ILogger<HyperaiXServer> logger)
         {
             _configuration = configuration;
             _provider = provider;
@@ -35,6 +32,12 @@ namespace HyperaiX.Clients
             return Task.CompletedTask;
         }
 
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            tokenSource.Cancel();
+            return Task.CompletedTask;
+        }
+
         private void Pull(CancellationToken token)
         {
             while (!token.IsCancellationRequested)
@@ -44,12 +47,6 @@ namespace HyperaiX.Clients
             }
 
             _logger.LogInformation("task cancelled");
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            tokenSource.Cancel();
-            return Task.CompletedTask;
         }
     }
 }

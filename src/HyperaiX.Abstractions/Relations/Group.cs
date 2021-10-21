@@ -1,10 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace HyperaiX.Abstractions.Relations
 {
-    public record Group: Contact
+    public record Group : Contact
     {
         public string Name { get; init; }
         public Lazy<Member> Owner { get; init; }

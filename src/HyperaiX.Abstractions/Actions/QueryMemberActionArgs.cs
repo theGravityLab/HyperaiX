@@ -3,7 +3,7 @@ using HyperaiX.Abstractions.Receipts;
 
 namespace HyperaiX.Abstractions.Actions
 {
-    public class QueryMemberActionArgs: GenericActionArgs
+    public class QueryMemberActionArgs : GenericActionArgs
     {
         public override Type Output => typeof(QueryMemberReceipt);
 

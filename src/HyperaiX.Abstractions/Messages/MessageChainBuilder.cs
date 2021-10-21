@@ -3,11 +3,15 @@ using IBuilder;
 
 namespace HyperaiX.Abstractions.Messages
 {
-    public class MessageChainBuilder: IBuilder<MessageChain>
+    public class MessageChainBuilder : IBuilder<MessageChain>
     {
         private readonly List<MessageElement> inner = new();
-        public MessageChain Build() => new MessageChain(inner);
-        
+
+        public MessageChain Build()
+        {
+            return new(inner);
+        }
+
         public MessageChainBuilder Add(MessageElement element)
         {
             inner.Add(element);

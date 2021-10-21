@@ -3,7 +3,7 @@ using HyperaiX.Abstractions.Relations;
 
 namespace HyperaiX.Abstractions.Events
 {
-    public class GroupMessageEventArgs: GenericEventArgs
+    public class GroupMessageEventArgs : GenericEventArgs
     {
         public Group Group { get; set; }
         public Member Sender { get; set; }
