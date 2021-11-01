@@ -5,16 +5,16 @@ using IBuilder;
 
 namespace HyperaiX.Units
 {
-    public class UnitMiddlewareConfigurationBuilder: IBuilder<UnitMiddlewareConfiguration>
+    public class UnitServiceConfigurationBuilder: IBuilder<UnitServiceConfiguration>
     {
         private List<Type> units = new();
 
-        public UnitMiddlewareConfiguration Build() => new()
+        public UnitServiceConfiguration Build() => new()
         {
             Units = units
         };
 
-        public UnitMiddlewareConfigurationBuilder AddUnit(Type type)
+        public UnitServiceConfigurationBuilder AddUnit(Type type)
         {
             if (!type.IsAssignableTo(typeof(UnitBase)))
             {

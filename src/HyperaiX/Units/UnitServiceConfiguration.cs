@@ -4,7 +4,7 @@ using HyperaiX.Units;
 
 namespace HyperaiX.Units
 {
-    public class UnitMiddlewareConfiguration
+    public class UnitServiceConfiguration
     {
         public IEnumerable<Type> Units { get; set; }
     }

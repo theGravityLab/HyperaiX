@@ -4,9 +4,9 @@ using HyperaiX.Units;
 
 namespace HyperaiX.Units
 {
-    public static class UnitMiddlewareConfigurationBuilderExtensions
+    public static class UnitServiceConfigurationBuilderExtensions
     {
-        public static UnitMiddlewareConfigurationBuilder MapUnits(this UnitMiddlewareConfigurationBuilder builder)
+        public static UnitServiceConfigurationBuilder MapUnits(this UnitServiceConfigurationBuilder builder)
         {
             var entries = AssemblyLoadContext.All.SelectMany(x => x.Assemblies).SelectMany(x => x.GetExportedTypes())
                 .Where(x => x.IsAssignableTo(typeof(UnitBase)));

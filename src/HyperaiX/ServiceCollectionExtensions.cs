@@ -25,11 +25,12 @@ namespace HyperaiX
             return AddHyperaiX(services, null);
         }
 
-        public static IServiceCollection AddUnits(this IServiceCollection services, Action<UnitMiddlewareConfigurationBuilder> configure)
+        public static IServiceCollection AddUnits(this IServiceCollection services, Action<UnitServiceConfigurationBuilder> configure)
         {
-            var builder = new UnitMiddlewareConfigurationBuilder();
+            var builder = new UnitServiceConfigurationBuilder();
             configure?.Invoke(builder);
             services.AddSingleton(builder.Build());
+            services.AddSingleton<UnitService>();
             return services;
         }
     }
