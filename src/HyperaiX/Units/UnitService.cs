@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HyperaiX.Abstractions;
@@ -15,6 +16,7 @@ using HyperaiX.Abstractions.Messages.ConcreteModels;
 using HyperaiX.Abstractions.Relations;
 using HyperaiX.Units.Attributes;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Group = System.Text.RegularExpressions.Group;
 
 namespace HyperaiX.Units
@@ -24,8 +26,9 @@ namespace HyperaiX.Units
         private readonly UnitServiceConfiguration _configuration;
         private readonly IEnumerable<(Type, MethodInfo)> _methods;
         private readonly IServiceProvider _provider;
+        private readonly ILogger _logger;
 
-        public UnitService(UnitServiceConfiguration configuration, IServiceProvider provider)
+        public UnitService(UnitServiceConfiguration configuration, IServiceProvider provider, ILogger<UnitService> logger)
         {
             _configuration = configuration;
             _methods = _configuration.Units.SelectMany(t =>
@@ -33,6 +36,7 @@ namespace HyperaiX.Units
                     .Where(m => m.IsPublic && !m.IsAbstract && !m.IsStatic && !m.IsConstructor)
                     .Select(m => (t, m)));
             _provider = provider;
+            _logger = logger;
         }
 
         public void Push(MessageContext context)
@@ -92,7 +96,7 @@ namespace HyperaiX.Units
                 var arguments = PrepareArguments(context, properties, method);
                 var unit = ActivatorUtilities.CreateInstance(_provider, type) as UnitBase;
                 unit.Context = context;
-                InvokeMethod(method, unit, arguments);
+                InvokeMethod(method, unit, arguments, context);
             }
         }
 
@@ -123,7 +127,7 @@ namespace HyperaiX.Units
                             "Only support MessageElement, MessageChain, string")
                     };
                 }
-                else if(contextTypes.ContainsKey(parameter.ParameterType))
+                else if (contextTypes.ContainsKey(parameter.ParameterType))
                 {
                     arguments[count] = contextTypes[parameter.ParameterType];
                 }
@@ -136,17 +140,54 @@ namespace HyperaiX.Units
             return arguments;
         }
 
-        private void InvokeMethod(MethodInfo method, UnitBase unit, object[] arguments)
+        private void InvokeMethod(MethodInfo method, UnitBase unit, object[] arguments, MessageContext context)
         {
-            //TODO: support custom return type
             if (method.GetCustomAttribute<AsyncStateMachineAttribute>() != null)
             {
-                Task.Run(() => method.Invoke(unit, arguments)).ConfigureAwait(false);
+                Task.Run(async () =>
+              {
+                  if (method.Invoke(unit, arguments) is not Task task) return;
+                  await task.ConfigureAwait(false);
+                  var result = task.GetType().GetProperty("Result").GetValue(task);
+                  if (task.IsCompletedSuccessfully)
+                  {
+                      await ForwardActionResultAsync(result, context);
+                  }else
+                  {
+                      var exception = task.Exception;
+                      _logger.LogError(exception,"Exception caught while running async method: {MethodName}", method.Name);
+                  }
+              }).ConfigureAwait(false);
             }
             else
             {
-                method.Invoke(unit, arguments);
+                Task.Run(async () =>
+               {
+                   if (method.Invoke(unit, arguments) is not object result) return;
+                   await ForwardActionResultAsync(result, context);
+               });
             }
+        }
+
+        private async Task ForwardActionResultAsync(object result, MessageContext context)
+        {
+            // MessageElement
+            // MessageChainBuilder
+            // string
+            // StringBuilder
+            // IEnumerable<MessageElement>
+            var chain = result switch
+            {
+                MessageChain it => it,
+                string it => MessageChain.Construct(new Plain(it)),
+                StringBuilder it => MessageChain.Construct(new Plain(it.ToString())),
+                IEnumerable<MessageElement> it => new MessageChain(it),
+                MessageChainBuilder it => it.Build(),
+                MessageElement it => MessageChain.Construct(it),
+                _ => throw new NotImplementedException()
+            };
+            await context.SendMessageAsync(chain);
+            _logger.LogInformation("Forwarded by ReturnType({Type} to {Type})", result.GetType().Name, context.Type);
         }
     }
 }
