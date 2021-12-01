@@ -29,7 +29,6 @@ namespace HyperaiX.Units.Attributes
                     ? $@"(?<{match.Groups["name"]}>\{{[a-zA-Z0-9]+:{match.Groups["format"]}\}})"
                     : $@"(?<{match.Groups["name"]}>.*)"
             );
-            Console.WriteLine(compiled);
             Compiled = new Regex(compiled);
         }
 
