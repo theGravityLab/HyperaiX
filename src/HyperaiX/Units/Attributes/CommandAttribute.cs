@@ -10,6 +10,7 @@ namespace HyperaiX.Units.Attributes
         {
             Text = text;
             Prefix = prefix;
+            throw new NotImplementedException();
         }
 
         public string Text { get; set; }

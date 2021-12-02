@@ -17,7 +17,6 @@ using HyperaiX.Abstractions.Relations;
 using HyperaiX.Units.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Group = System.Text.RegularExpressions.Group;
 
 namespace HyperaiX.Units
 {
@@ -41,12 +40,6 @@ namespace HyperaiX.Units
 
         public void Push(MessageContext context)
         {
-            // compile message chain
-            var message = context.Message;
-            // TODO: escape curly braces
-            // !echo --message {1:Image}
-            var flatten = message.Flatten();
-
             foreach (var (type, method) in _methods)
             {
                 var receiver = method.GetCustomAttribute<ReceiverAttribute>();
@@ -55,44 +48,19 @@ namespace HyperaiX.Units
                     continue;
                 }
 
-                var command = method.GetCustomAttribute<CommandAttribute>();
-                if (command != null)
+                var extractors = method.GetCustomAttributes<ActionExtractorAttribute>(); // 取 any, 也就是都要跑一边，不管逻辑ALL也不逻辑短路
+                foreach (var extractor in extractors)
                 {
-                    ProcessCommand(context, type, method, command, flatten);
-                }
-
-                var handler = method.GetCustomAttribute<HandlerAttribute>();
-                if (handler != null)
-                {
-                    ProcessHandler(context, type, method, handler, flatten);
+                    Process(context, extractor, method, type);
                 }
             }
         }
 
-        private void ProcessCommand(MessageContext context, Type type, MethodInfo method, CommandAttribute command,
-            string flatten)
+        private void Process(MessageContext context, ActionExtractorAttribute extractor, MethodInfo method, Type type)
         {
-            //TODO: use command parse lib instead
-            //var options = method.GetCustomAttributes<OptionAttribute>();
-        }
-
-        private void ProcessHandler(MessageContext context, Type type, MethodInfo method, HandlerAttribute handler,
-            string flatten)
-        {
-            Match match = handler.Compiled.Match(flatten);
-            if (match.Success)
+            var success = extractor.Match(context, out var properties);
+            if (success)
             {
-                var properties = new Dictionary<string, MessageChain>();
-                foreach (Group group in match.Groups)
-                {
-                    if (group.Success && group.Name != string.Empty)
-                    {
-                        var key = group.Name;
-                        var value = group.Value;
-
-                        properties.Add(key, context.Message.Extract(value));
-                    }
-                }
                 var arguments = PrepareArguments(context, properties, method);
                 var unit = ActivatorUtilities.CreateInstance(_provider, type) as UnitBase;
                 unit.Context = context;
@@ -152,10 +120,11 @@ namespace HyperaiX.Units
                   if (task.IsCompletedSuccessfully)
                   {
                       await ForwardActionResultAsync(result, context);
-                  }else
+                  }
+                  else
                   {
                       var exception = task.Exception;
-                      _logger.LogError(exception,"Exception caught while running async method: {MethodName}", method.Name);
+                      _logger.LogError(exception, "Exception caught while running async method: {MethodName}", method.Name);
                   }
               }).ConfigureAwait(false);
             }
@@ -167,27 +136,27 @@ namespace HyperaiX.Units
                    await ForwardActionResultAsync(result, context);
                });
             }
-        }
 
-        private async Task ForwardActionResultAsync(object result, MessageContext context)
-        {
-            // MessageElement
-            // MessageChainBuilder
-            // string
-            // StringBuilder
-            // IEnumerable<MessageElement>
-            var chain = result switch
+            async Task ForwardActionResultAsync(object result, MessageContext context)
             {
-                MessageChain it => it,
-                string it => MessageChain.Construct(new Plain(it)),
-                StringBuilder it => MessageChain.Construct(new Plain(it.ToString())),
-                IEnumerable<MessageElement> it => new MessageChain(it),
-                MessageChainBuilder it => it.Build(),
-                MessageElement it => MessageChain.Construct(it),
-                _ => throw new NotImplementedException()
-            };
-            await context.SendMessageAsync(chain);
-            _logger.LogInformation("Forwarded by ReturnType({Type} to {Type})", result.GetType().Name, context.Type);
+                // MessageElement
+                // MessageChainBuilder
+                // string
+                // StringBuilder
+                // IEnumerable<MessageElement>
+                var chain = result switch
+                {
+                    MessageChain it => it,
+                    string it => MessageChain.Construct(new Plain(it)),
+                    StringBuilder it => MessageChain.Construct(new Plain(it.ToString())),
+                    IEnumerable<MessageElement> it => new MessageChain(it),
+                    MessageChainBuilder it => it.Build(),
+                    MessageElement it => MessageChain.Construct(it),
+                    _ => throw new NotImplementedException()
+                };
+                await context.SendMessageAsync(chain);
+                _logger.LogInformation("Forwarded by ReturnType({Type} to {Type})", result.GetType().Name, context.Type);
+            }
         }
     }
 }

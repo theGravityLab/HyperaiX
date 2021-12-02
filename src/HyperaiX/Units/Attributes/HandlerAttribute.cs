@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using HyperaiX.Abstractions.Messages;
 
 namespace HyperaiX.Units.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class HandlerAttribute : Attribute
+    public class HandlerAttribute : RegexAttribte
     {
         public HandlerAttribute(string pattern)
         {
@@ -24,16 +26,17 @@ namespace HyperaiX.Units.Attributes
             var escaped = Regex.Escape(pattern);
             // NOTE: 因为原文经过转义 {image:Image} 会变成 \{image:Image} 前面多个斜杠
             var argReg = new Regex(@"\\\{(?<name>[a-zA-Z0-9_]+)(:(?<format>[a-zA-Z0-9]+))?\}");
-            var compiled = argReg.Replace(escaped, match =>
+            var compiled = argReg.Replace($"^{escaped}$", match =>
                 match.Groups["format"].Success
                     ? $@"(?<{match.Groups["name"]}>\{{[a-zA-Z0-9]+:{match.Groups["format"]}\}})"
                     : $@"(?<{match.Groups["name"]}>.*)"
             );
+
             Compiled = new Regex(compiled);
         }
 
-        public string Pattern { get; set; }
+        public HandlerAttribute() { }
 
-        internal Regex Compiled { get; private set; }
+        public string Pattern { get; set; }
     }
 }
