@@ -7,16 +7,16 @@ using HyperaiX.Abstractions.Messages;
 namespace HyperaiX.Units.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class RegexAttribte : ActionExtractorAttribute
+    public class RegexAttribute : ActionExtractorAttribute
     {
         public Regex Compiled { get; set; }
 
-        public RegexAttribte(Regex regex)
+        public RegexAttribute(Regex regex)
             => Compiled = regex;
 
-        public RegexAttribte(string regex) : this(new Regex(regex)) { }
+        public RegexAttribute(string regex) : this(new Regex(regex)) { }
 
-        public RegexAttribte() { }
+        public RegexAttribute() { }
 
 
         public override bool Match(MessageContext context, out IReadOnlyDictionary<string, MessageChain> properties)
