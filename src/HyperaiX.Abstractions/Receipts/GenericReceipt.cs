@@ -1,7 +1,6 @@
-namespace HyperaiX.Abstractions.Receipts
+namespace HyperaiX.Abstractions.Receipts;
+
+public class GenericReceipt
 {
-    public class GenericReceipt
-    {
-        public bool Success { get; set; } = true;
-    }
+    public bool Success { get; set; } = true;
 }

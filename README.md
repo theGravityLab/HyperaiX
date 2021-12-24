@@ -25,8 +25,11 @@ public Image Github(string owner, string repo)
 
 ```sh
 dotnet add package HyperaiX
+
 ```
+
 添加到程序通用/Web主机中：
+
 ```csharp
 host.ConfigureServices( services => services
     .AddHyperaiX()
@@ -48,10 +51,30 @@ class Bridge: IApiClient
 ```sh
 dotnet add package HyperaiX.Abstractions
 ```
+
 需要的场景：
+
 - 框架
 - API
 - BOT
 
 ## Documents
+
 没有。看看[上一代的文档](https://projhyperai.dowob.vip)吧。
+
+## TODO
+
+日后实现
+
+### Unit Scope
+
+通过切换 Unit 的上下文实现对于一个 Unit 在同一时间只为一个用户提供服务。也就是说一个或不同的 Unit 中的 UnitContext 会保证在同一个用户下一致。
+
+Unit Context 保存了 Unit 的状态，其中有 Unit 的持久化数据(kv数据库，Unit生命中周期为一次事务)，其他不知道，以后再加。
+
+使用 Attribute 来决定上下文共享方式，例如`[SharingScope(UnitContextScope)]`。其中 `UnitContextScope` 具有以下值：
+
+- 单Unit单用户
+- 单Unit多用户
+- 多Unit单用户
+- 全局共享

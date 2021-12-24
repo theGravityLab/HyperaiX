@@ -1,7 +1,6 @@
-namespace HyperaiX.Abstractions.Messages
+namespace HyperaiX.Abstractions.Messages;
+
+public interface IMessageChainFormatter
 {
-    public interface IMessageChainFormatter
-    {
-        string Format(MessageChain chain);
-    }
+    string Format(MessageChain chain);
 }

@@ -1,7 +1,6 @@
-namespace HyperaiX.Abstractions.Relations
+namespace HyperaiX.Abstractions.Relations;
+
+public record Friend : User
 {
-    public record Friend : User
-    {
-        public string Remark { get; init; }
-    }
+    public string Remark { get; init; }
 }

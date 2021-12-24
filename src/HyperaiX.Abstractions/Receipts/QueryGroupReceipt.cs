@@ -1,9 +1,8 @@
 using HyperaiX.Abstractions.Relations;
 
-namespace HyperaiX.Abstractions.Receipts
+namespace HyperaiX.Abstractions.Receipts;
+
+public class QueryGroupReceipt : GenericReceipt
 {
-    public class QueryGroupReceipt : GenericReceipt
-    {
-        public Group Group { get; set; }
-    }
+    public Group Group { get; set; }
 }

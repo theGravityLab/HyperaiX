@@ -1,6 +1,5 @@
-namespace HyperaiX.Abstractions.Messages.ConcreteModels
+namespace HyperaiX.Abstractions.Messages.ConcreteModels;
+
+public sealed record AtAll : MessageElement
 {
-    public sealed record AtAll : MessageElement
-    {
-    }
 }

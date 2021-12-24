@@ -1,12 +1,11 @@
-namespace HyperaiX.Abstractions.Messages.ConcreteModels
-{
-    public sealed record Face : MessageElement
-    {
-        public Face(int faceId)
-        {
-            FaceId = faceId;
-        }
+namespace HyperaiX.Abstractions.Messages.ConcreteModels;
 
-        public int FaceId { get; init; }
+public sealed record Face : MessageElement
+{
+    public Face(int faceId)
+    {
+        FaceId = faceId;
     }
+
+    public int FaceId { get; init; }
 }

@@ -1,77 +1,76 @@
-namespace HyperaiX.Abstractions.Relations
+namespace HyperaiX.Abstractions.Relations;
+
+public class Signature
 {
-    public class Signature
+    public Signature(string expression)
     {
-        public Signature(string expression)
+        Expression = expression;
+    }
+
+    public string Expression { get; set; }
+    public long Destination { get; set; }
+
+    public bool Match(Member member)
+    {
+        var prefix = Expression.Substring(0, Expression.IndexOf(':'));
+        var postfix = Expression.Substring(prefix.Length + 1);
+
+        if (prefix == "*")
         {
-            Expression = expression;
-        }
-
-        public string Expression { get; set; }
-        public long Destination { get; set; }
-
-        public bool Match(Member member)
-        {
-            var prefix = Expression.Substring(0, Expression.IndexOf(':'));
-            var postfix = Expression.Substring(prefix.Length + 1);
-
-            if (prefix == "*")
-            {
-                if (long.TryParse(postfix, out var result)) return result == member.Identity;
-
-                return false;
-            }
-
-            return prefix == member.Group.Value.Identity.ToString() && (postfix == "*" ||
-                                                                        member.Group.Value.Identity.ToString() ==
-                                                                        prefix &&
-                                                                        member.Identity.ToString() == postfix);
-        }
-
-        public bool Match(Friend friend)
-        {
-            var prefix = Expression.Substring(0, Expression.IndexOf(':'));
-            var postfix = Expression.Substring(prefix.Length + 1);
-
-            if (prefix == "*") return false;
-            if (prefix == "_")
-            {
-                if (long.TryParse(postfix, out var result)) return result == friend.Identity;
-
-                return postfix == "*";
-            }
+            if (long.TryParse(postfix, out var result)) return result == member.Identity;
 
             return false;
         }
 
-        public static Signature FromGroup(long groupId)
+        return prefix == member.Group.Value.Identity.ToString() && (postfix == "*" ||
+                                                                    member.Group.Value.Identity.ToString() ==
+                                                                    prefix &&
+                                                                    member.Identity.ToString() == postfix);
+    }
+
+    public bool Match(Friend friend)
+    {
+        var prefix = Expression.Substring(0, Expression.IndexOf(':'));
+        var postfix = Expression.Substring(prefix.Length + 1);
+
+        if (prefix == "*") return false;
+        if (prefix == "_")
         {
-            return new Signature($"{groupId}:*");
+            if (long.TryParse(postfix, out var result)) return result == friend.Identity;
+
+            return postfix == "*";
         }
 
-        public static Signature FromMember(long groupId, long memberId)
-        {
-            return new Signature($"{groupId}:{memberId}");
-        }
+        return false;
+    }
 
-        public static Signature FromAnyGroup(long userId)
-        {
-            return new Signature($"*:{userId}");
-        }
+    public static Signature FromGroup(long groupId)
+    {
+        return new Signature($"{groupId}:*");
+    }
 
-        public static Signature FromAnyGroupAnyMember()
-        {
-            return new Signature("*:*");
-        }
+    public static Signature FromMember(long groupId, long memberId)
+    {
+        return new Signature($"{groupId}:{memberId}");
+    }
 
-        public static Signature FromFriend(long friendId)
-        {
-            return new Signature($"_:{friendId}");
-        }
+    public static Signature FromAnyGroup(long userId)
+    {
+        return new Signature($"*:{userId}");
+    }
 
-        public static Signature FromAnyFriend()
-        {
-            return new Signature("_:*");
-        }
+    public static Signature FromAnyGroupAnyMember()
+    {
+        return new Signature("*:*");
+    }
+
+    public static Signature FromFriend(long friendId)
+    {
+        return new Signature($"_:{friendId}");
+    }
+
+    public static Signature FromAnyFriend()
+    {
+        return new Signature("_:*");
     }
 }

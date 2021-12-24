@@ -1,11 +1,10 @@
 using HyperaiX.Abstractions.Actions;
 using HyperaiX.Abstractions.Events;
 
-namespace HyperaiX.Abstractions.Communication
+namespace HyperaiX.Abstractions.Communication;
+
+public interface IChannel
 {
-    public interface IChannel
-    {
-        void Write(GenericActionArgs action);
-        GenericEventArgs Read();
-    }
+    void Write(GenericActionArgs action);
+    GenericEventArgs Read();
 }

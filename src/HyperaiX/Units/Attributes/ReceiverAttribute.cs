@@ -1,13 +1,15 @@
 using System;
 using HyperaiX.Abstractions;
 
-namespace HyperaiX.Units.Attributes
-{
-    [AttributeUsage(AttributeTargets.Method)]
-    public class ReceiverAttribute : Attribute
-    {
-        public MessageEventType Type { get; set; }
+namespace HyperaiX.Units.Attributes;
 
-        public ReceiverAttribute(MessageEventType type) => Type = type;
+[AttributeUsage(AttributeTargets.Method)]
+public class ReceiverAttribute : Attribute
+{
+    public ReceiverAttribute(MessageEventType type)
+    {
+        Type = type;
     }
+
+    public MessageEventType Type { get; set; }
 }

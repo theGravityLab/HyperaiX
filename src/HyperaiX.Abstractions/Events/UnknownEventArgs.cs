@@ -1,7 +1,6 @@
-namespace HyperaiX.Abstractions.Events
+namespace HyperaiX.Abstractions.Events;
+
+public class UnknownEventArgs : GenericEventArgs
 {
-    public class UnknownEventArgs : GenericEventArgs
-    {
-        public object Data { get; set; }
-    }
+    public object Data { get; set; }
 }

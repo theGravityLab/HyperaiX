@@ -1,7 +1,6 @@
-namespace HyperaiX.Abstractions.Messages
+namespace HyperaiX.Abstractions.Messages;
+
+public abstract record MessageElement
 {
-    public abstract record MessageElement
-    {
-        public string TypeName => GetType().Name;
-    }
+    public string TypeName => GetType().Name;
 }

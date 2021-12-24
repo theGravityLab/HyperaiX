@@ -8,67 +8,66 @@ using HyperaiX.Abstractions.Events;
 using IBuilder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace HyperaiX.Clients
+namespace HyperaiX.Clients;
+
+public class HyperaiXConfigurationBuilder : IBuilder<HyperaiXConfiguration>
 {
-    public class HyperaiXConfigurationBuilder : IBuilder<HyperaiXConfiguration>
+    private readonly List<Action<GenericEventArgs, IServiceProvider, Action<GenericEventArgs, IServiceProvider>>>
+        middlewares = new();
+
+    public HyperaiXConfiguration Build()
     {
-        private readonly List<Action<GenericEventArgs, IServiceProvider, Action<GenericEventArgs, IServiceProvider>>>
-            middlewares = new();
+        // weave pipeline
+        Action<GenericEventArgs, IServiceProvider> pipeline = (args, provider) => { };
 
-        public HyperaiXConfiguration Build()
+        // a, b, c => c, b, a
+        // c => c(), empty | pipeline() => c() -> empty()
+        // b => b(), c | pipeline() => b() -> c() -> empty()
+        // a => a(), b | pipeline() => a() -> b() -> c() -> empty()
+
+        foreach (var m in Enumerable.Reverse(middlewares))
         {
-            // weave pipeline
-            Action<GenericEventArgs, IServiceProvider> pipeline = (args, provider) => { };
-
-            // a, b, c => c, b, a
-            // c => c(), empty | pipeline() => c() -> empty()
-            // b => b(), c | pipeline() => b() -> c() -> empty()
-            // a => a(), b | pipeline() => a() -> b() -> c() -> empty()
-
-            foreach (var m in Enumerable.Reverse(middlewares))
-            {
-                var _pipeline = pipeline;
-                pipeline = (evt, provider) => m(evt, provider, _pipeline);
-            }
-
-            return new HyperaiXConfiguration
-            {
-                Pipeline = pipeline
-            };
+            var _pipeline = pipeline;
+            pipeline = (evt, provider) => m(evt, provider, _pipeline);
         }
 
-
-        public HyperaiXConfigurationBuilder Use(
-            Action<GenericEventArgs, IServiceProvider, Action<GenericEventArgs, IServiceProvider>> middleware)
+        return new HyperaiXConfiguration
         {
-            middlewares.Add(middleware);
-            return this;
-        }
+            Pipeline = pipeline
+        };
+    }
 
-        public HyperaiXConfigurationBuilder Use(Type type)
+
+    public HyperaiXConfigurationBuilder Use(
+        Action<GenericEventArgs, IServiceProvider, Action<GenericEventArgs, IServiceProvider>> middleware)
+    {
+        middlewares.Add(middleware);
+        return this;
+    }
+
+    public HyperaiXConfigurationBuilder Use(Type type)
+    {
+        return Use((evt, pvd, next) =>
         {
-            return Use((evt, pvd, next) =>
-            {
-                var exception =
-                    new InvalidOperationException(
-                        $"{type} has no required method Execute[Async](GenericEventArgs args, Action next)");
-                var execute = type.GetMethod("Execute") ?? type.GetMethod("ExecuteAsync") ?? throw exception;
-                if (!execute.GetParameters().Select(x => x.ParameterType)
+            var exception =
+                new InvalidOperationException(
+                    $"{type} has no required method Execute[Async](GenericEventArgs args, Action next)");
+            var execute = type.GetMethod("Execute") ?? type.GetMethod("ExecuteAsync") ?? throw exception;
+            if (!execute.GetParameters().Select(x => x.ParameterType)
                     .SequenceEqual(new[] { typeof(GenericEventArgs), typeof(Action) })) throw exception;
 
 
-                var middleware = ActivatorUtilities.CreateInstance(pvd, type);
-                Action nextDelegate = () => next(evt, pvd);
-                if (execute.GetCustomAttribute<AsyncStateMachineAttribute>() != null)
-                {
-                    var task = execute.Invoke(middleware, new object[] { evt, nextDelegate }) as Task;
-                    task.Wait();
-                }
-                else
-                {
-                    execute.Invoke(middleware, new object[] { evt, nextDelegate });
-                }
-            });
-        }
+            var middleware = ActivatorUtilities.CreateInstance(pvd, type);
+            var nextDelegate = () => next(evt, pvd);
+            if (execute.GetCustomAttribute<AsyncStateMachineAttribute>() != null)
+            {
+                var task = execute.Invoke(middleware, new object[] { evt, nextDelegate }) as Task;
+                task.Wait();
+            }
+            else
+            {
+                execute.Invoke(middleware, new object[] { evt, nextDelegate });
+            }
+        });
     }
 }

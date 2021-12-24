@@ -1,7 +1,6 @@
-namespace HyperaiX.Abstractions.Relations
+namespace HyperaiX.Abstractions.Relations;
+
+public abstract record User : Contact
 {
-    public abstract record User : Contact
-    {
-        public string Nickname { get; init; }
-    }
+    public string Nickname { get; init; }
 }

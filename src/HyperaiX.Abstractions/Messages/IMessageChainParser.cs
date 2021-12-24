@@ -1,7 +1,6 @@
-namespace HyperaiX.Abstractions.Messages
+namespace HyperaiX.Abstractions.Messages;
+
+public interface IMessageChainParser
 {
-    public interface IMessageChainParser
-    {
-        MessageChain Parse(string text);
-    }
+    MessageChain Parse(string text);
 }

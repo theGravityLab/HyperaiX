@@ -1,15 +1,17 @@
-using System;
 using HyperaiX.Clients;
 using HyperaiX.Units;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace HyperaiX
+namespace HyperaiX;
+
+public static class HyperaiXConfigurationBuilderExtensions
 {
-    public static class HyperaiXConfigurationBuilderExtensions
+    public static HyperaiXConfigurationBuilder Use<T>(this HyperaiXConfigurationBuilder builder)
     {
-        public static HyperaiXConfigurationBuilder Use<T>(this HyperaiXConfigurationBuilder builder) => builder.Use(typeof(T));
-        
-        public static HyperaiXConfigurationBuilder UseUnits(this HyperaiXConfigurationBuilder builder) => 
-            builder.Use<UnitMiddleware>();
+        return builder.Use(typeof(T));
+    }
+
+    public static HyperaiXConfigurationBuilder UseUnits(this HyperaiXConfigurationBuilder builder)
+    {
+        return builder.Use<UnitMiddleware>();
     }
 }

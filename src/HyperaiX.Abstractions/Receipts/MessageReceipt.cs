@@ -1,7 +1,6 @@
-namespace HyperaiX.Abstractions.Receipts
+namespace HyperaiX.Abstractions.Receipts;
+
+public class MessageReceipt : GenericReceipt
 {
-    public class MessageReceipt : GenericReceipt
-    {
-        public long MessageId { get; set; }
-    }
+    public long MessageId { get; set; }
 }

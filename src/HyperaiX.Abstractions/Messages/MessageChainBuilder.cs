@@ -1,27 +1,26 @@
 using System.Collections.Generic;
 using IBuilder;
 
-namespace HyperaiX.Abstractions.Messages
+namespace HyperaiX.Abstractions.Messages;
+
+public class MessageChainBuilder : IBuilder<MessageChain>
 {
-    public class MessageChainBuilder : IBuilder<MessageChain>
+    private readonly List<MessageElement> inner = new();
+
+    public MessageChain Build()
     {
-        private readonly List<MessageElement> inner = new();
+        return new MessageChain(inner);
+    }
 
-        public MessageChain Build()
-        {
-            return new(inner);
-        }
+    public MessageChainBuilder Add(MessageElement element)
+    {
+        inner.Add(element);
+        return this;
+    }
 
-        public MessageChainBuilder Add(MessageElement element)
-        {
-            inner.Add(element);
-            return this;
-        }
-
-        public MessageChainBuilder AddRange(IEnumerable<MessageElement> elements)
-        {
-            inner.AddRange(elements);
-            return this;
-        }
+    public MessageChainBuilder AddRange(IEnumerable<MessageElement> elements)
+    {
+        inner.AddRange(elements);
+        return this;
     }
 }

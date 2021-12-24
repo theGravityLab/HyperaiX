@@ -2,11 +2,10 @@ using HyperaiX.Abstractions.Actions;
 using HyperaiX.Abstractions.Events;
 using HyperaiX.Abstractions.Receipts;
 
-namespace HyperaiX
+namespace HyperaiX;
+
+public interface IApiClient
 {
-    public interface IApiClient
-    {
-        public GenericEventArgs Read();
-        public GenericReceipt Write(GenericActionArgs action);
-    }
+    public GenericEventArgs Read();
+    public GenericReceipt Write(GenericActionArgs action);
 }
