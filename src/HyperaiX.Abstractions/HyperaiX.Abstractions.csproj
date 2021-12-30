@@ -14,7 +14,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="IBuilder" Version="0.1.0"/>
+        <PackageReference Include="IBuilder" Version="0.1.0" />
     </ItemGroup>
 
 </Project>

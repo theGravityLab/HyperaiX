@@ -65,4 +65,21 @@ public static class ApiClientExtensions
         var receipt = await client.WriteAsync(args) as QueryMemberReceipt;
         return receipt.Member;
     }
+
+    public static async Task<MessageChain> GetMessageAsync(this IApiClient client, long messageId)
+    {
+        var args = new QueryMessageActionArgs()
+        {
+            MessageId = messageId
+        };
+        var receipt = await client.WriteAsync(args) as QueryMessageReceipt;
+        return receipt.Message;
+    }
+
+    public static async Task<Self> GetSelfInfoAsync(this IApiClient client)
+    {
+        var args = new QuerySelfActionArgs();
+        var receipt = await client.WriteAsync(args) as QuerySelfReceipt;
+        return receipt.Info;
+    }
 }
