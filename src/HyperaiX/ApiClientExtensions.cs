@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using HyperaiX.Abstractions.Actions;
 using HyperaiX.Abstractions.Messages;
@@ -20,8 +21,11 @@ public static class ApiClientExtensions
             FriendId = friendId,
             Message = chain
         };
-        var receipt = await client.WriteAsync(args) as MessageReceipt;
-        return receipt.MessageId;
+        return await client.WriteAsync(args) switch
+        {
+            MessageReceipt receipt => receipt.MessageId,
+            _ => default,
+        };
     }
 
     public static async Task<long> SendGroupMessageAsync(this IApiClient client, long groupId, MessageChain chain)
@@ -31,8 +35,11 @@ public static class ApiClientExtensions
             GroupId = groupId,
             Message = chain
         };
-        var receipt = await client.WriteAsync(args) as MessageReceipt;
-        return receipt.MessageId;
+        return await client.WriteAsync(args) switch
+        {
+            MessageReceipt receipt => receipt.MessageId,
+            _ => default,
+        };
     }
 
     public static async Task<Group> GetGroupInfoAsync(this IApiClient client, long groupId)
@@ -41,8 +48,11 @@ public static class ApiClientExtensions
         {
             GroupId = groupId
         };
-        var receipt = await client.WriteAsync(args) as QueryGroupReceipt;
-        return receipt.Group;
+        return await client.WriteAsync(args) switch
+        {
+            QueryGroupReceipt receipt => receipt.Group,
+            _ => default,
+        };
     }
 
     public static async Task<Friend> GetFriendInfoAsync(this IApiClient client, long friendId)
@@ -51,8 +61,11 @@ public static class ApiClientExtensions
         {
             FriendId = friendId
         };
-        var receipt = await client.WriteAsync(args) as QueryFriendReceipt;
-        return receipt.Friend;
+        return await client.WriteAsync(args) switch
+        {
+            QueryFriendReceipt receipt => receipt.Friend,
+            _ => default,
+        };
     }
 
     public static async Task<Member> GetMemberInfoAsync(this IApiClient client, long groupId, long memberId)
@@ -62,8 +75,11 @@ public static class ApiClientExtensions
             GroupId = groupId,
             MemberId = memberId
         };
-        var receipt = await client.WriteAsync(args) as QueryMemberReceipt;
-        return receipt.Member;
+        return await client.WriteAsync(args) switch
+        {
+            QueryMemberReceipt receipt => receipt.Member,
+            _ => default,
+        };
     }
 
     public static async Task<MessageChain> GetMessageAsync(this IApiClient client, long messageId)
@@ -72,14 +88,20 @@ public static class ApiClientExtensions
         {
             MessageId = messageId
         };
-        var receipt = await client.WriteAsync(args) as QueryMessageReceipt;
-        return receipt.Message;
+        return await client.WriteAsync(args) switch
+        {
+            QueryMessageReceipt receipt => receipt.Message,
+            _ => default,
+        };
     }
 
     public static async Task<Self> GetSelfInfoAsync(this IApiClient client)
     {
         var args = new QuerySelfActionArgs();
-        var receipt = await client.WriteAsync(args) as QuerySelfReceipt;
-        return receipt.Info;
+        return await client.WriteAsync(args) switch
+        {
+            QuerySelfReceipt receipt => receipt.Info,
+            _ => default
+        };
     }
 }
