@@ -6,10 +6,10 @@ public sealed record Node : MessageElement
     {
         UserIdentity = UserIdentity;
         UserDisplayName = userDisplayName;
-        Message = chain;
+        Reference = chain;
     }
 
     public long UserIdentity { get; init; }
     public string UserDisplayName { get; init; }
-    public MessageChain Message { get; init; }
+    public MessageChain Reference { get; init; }
 }

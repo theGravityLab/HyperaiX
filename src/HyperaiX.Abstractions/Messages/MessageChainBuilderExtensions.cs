@@ -46,4 +46,10 @@ public static class MessageChainBuilderExtensions
         var atAll = new AtAll();
         return builder.Add(atAll);
     }
+
+    public static MessageChainBuilder AddNode(this MessageChainBuilder builder, long userIdentity, string displayName, MessageChain reference)
+    {
+        var node = new Node(userIdentity, displayName, reference);
+        return builder.Add(node);
+    }
 }

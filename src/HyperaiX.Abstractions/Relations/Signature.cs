@@ -22,8 +22,8 @@ public class Signature
             return false;
         }
 
-        return prefix == member.Group.Value.Identity.ToString() && (postfix == "*" ||
-                                                                    member.Group.Value.Identity.ToString() ==
+        return prefix == member.GroupIdentity.ToString() && (postfix == "*" ||
+                                                                    member.GroupIdentity.ToString() ==
                                                                     prefix &&
                                                                     member.Identity.ToString() == postfix);
     }

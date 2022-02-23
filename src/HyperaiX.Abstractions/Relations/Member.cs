@@ -16,7 +16,6 @@ public record Member : User
     public string Title { get; init; }
     public bool IsMuted { get; init; }
     public long GroupIdentity { get; init; }
-    public Lazy<Group> Group { get; init; }
 
     public override string Identifier => $"{Identity}@{GroupIdentity}";
 }
