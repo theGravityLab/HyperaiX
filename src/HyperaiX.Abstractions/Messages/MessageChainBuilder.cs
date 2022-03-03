@@ -14,7 +14,7 @@ public class MessageChainBuilder : IBuilder<MessageChain>
 
     public MessageChainBuilder Add(MessageElement element)
     {
-        inner.Add(element);
+        if(element != null) inner.Add(element);
         return this;
     }
 
