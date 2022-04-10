@@ -4,9 +4,9 @@ using System.Text.RegularExpressions;
 namespace HyperaiX.Units.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class HandlerAttribute : RegexAttribute
+public class ExtractAttribute : RegexAttribute
 {
-    public HandlerAttribute(string pattern)
+    public ExtractAttribute(string pattern)
     {
         Pattern = pattern;
 
@@ -33,7 +33,7 @@ public class HandlerAttribute : RegexAttribute
         Compiled = new Regex(compiled);
     }
 
-    public HandlerAttribute()
+    public ExtractAttribute()
     {
     }
 

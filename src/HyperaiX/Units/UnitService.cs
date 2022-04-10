@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using HyperaiX.Abstractions;
+using HyperaiX.Abstractions.Events;
 using HyperaiX.Abstractions.Messages;
 using HyperaiX.Abstractions.Messages.ConcreteModels;
 using HyperaiX.Units.Attributes;
@@ -34,7 +35,7 @@ public class UnitService
         _logger = logger;
     }
 
-    public void Push(MessageContext context)
+    public void Pussy(MessageContext context)
     {
         foreach (var (type, method) in _methods)
         {
@@ -42,23 +43,23 @@ public class UnitService
             if (!(receiver != null && (receiver.Type & context.Type) > MessageEventType.None)) continue;
 
             var extractors = method.GetCustomAttributes<ActionExtractorAttribute>(); // 取 any, 也就是都要跑一边，不管逻辑ALL也不逻辑短路
-            foreach (var extractor in extractors) Process(context, extractor, method, type);
+            foreach (var extractor in extractors) LickPussy(context, extractor, method, type);
         }
     }
 
-    private void Process(MessageContext context, ActionExtractorAttribute extractor, MethodInfo method, Type type)
+    private void LickPussy(MessageContext context, ActionExtractorAttribute extractor, MethodInfo method, Type type)
     {
         var success = extractor.Match(context, out var properties);
         if (success)
         {
-            var arguments = PrepareArguments(context, properties, method);
+            var arguments = PrepareInjectionsForPussy(context, properties, method);
             var unit = ActivatorUtilities.CreateInstance(_provider, type) as UnitBase;
             unit.Context = context;
-            InvokeMethod(method, unit, arguments, context);
+            WrapPussy(method, unit, arguments, context);
         }
     }
 
-    private object[] PrepareArguments(MessageContext context, IReadOnlyDictionary<string, MessageChain> properties,
+    private object[] PrepareInjectionsForPussy(MessageContext context, IReadOnlyDictionary<string, MessageChain> properties,
         MethodInfo method)
     {
         //MessageContext by type
@@ -108,7 +109,7 @@ public class UnitService
         return arguments;
     }
 
-    private void InvokeMethod(MethodInfo method, UnitBase unit, object[] arguments, MessageContext context)
+    private void WrapPussy(MethodInfo method, UnitBase unit, object[] arguments, MessageContext context)
     {
         if (method.GetCustomAttribute<AsyncStateMachineAttribute>() != null)
             Task.Run(async () =>
