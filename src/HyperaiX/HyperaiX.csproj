@@ -10,14 +10,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="IBuilder" Version="0.1.0"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0"/>
+        <PackageReference Include="IBuilder" Version="0.1.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\HyperaiX.Abstractions\HyperaiX.Abstractions.csproj"/>
+        <ProjectReference Include="..\HyperaiX.Abstractions\HyperaiX.Abstractions.csproj" />
+        <ProjectReference Include="..\..\..\duffet\src\Duffet\Duffet.csproj" />
     </ItemGroup>
 
 </Project>

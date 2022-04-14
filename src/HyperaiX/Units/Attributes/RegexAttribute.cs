@@ -6,7 +6,7 @@ using HyperaiX.Abstractions.Messages;
 namespace HyperaiX.Units.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class RegexAttribute : ActionExtractorAttribute
+public class RegexAttribute : ActionFieldAttributeBase
 {
     public RegexAttribute(Regex regex)
     {

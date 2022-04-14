@@ -12,6 +12,7 @@ using HyperaiX.Abstractions.Messages.ConcreteModels;
 using HyperaiX.Units.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Duffet;
 
 namespace HyperaiX.Units;
 
@@ -42,23 +43,31 @@ public class UnitService
             var receiver = method.GetCustomAttribute<ReceiverAttribute>();
             if (!(receiver != null && (receiver.Type & context.Type) > MessageEventType.None)) continue;
 
-            var extractors = method.GetCustomAttributes<ActionExtractorAttribute>(); // 取 any, 也就是都要跑一边，不管逻辑ALL也不逻辑短路
-            foreach (var extractor in extractors) LickPussy(context, extractor, method, type);
+            var extractors = method.GetCustomAttributes<ActionFieldAttributeBase>(); // 取 any, 也就是都要跑一边，不管逻辑ALL也不逻辑短路
+            foreach (var extractor in extractors) LickPussy(context, extractor, method, type); //TODO: 有过滤器就按照过滤器挨个执行，如果没有过滤器就不提供 MessageChain 候选执行一次
         }
     }
 
-    private void LickPussy(MessageContext context, ActionExtractorAttribute extractor, MethodInfo method, Type type)
+    private void LickPussy(MessageContext context, ActionFieldAttributeBase extractor, MethodInfo method, Type type)
     {
         var success = extractor.Match(context, out var properties);
         if (success)
         {
-            var arguments = PrepareInjectionsForPussy(context, properties, method);
+            var builder = Bank.Builder();
+            foreach (var property in properties)
+            {
+                builder.Property().Named(property.Key).Typed(typeof(MessageChain))
+                    .HasTypeAdapted(typeof(MessageChain), (it, type) => it)
+                    .HasTypeAdapted(typeof(MessageElement), (it, type) => ((MessageChain)it).First(x => x.GetType() == type))
+                    .HasTypeAdapted(typeof(string), (it, type) => it.ToString());
+            }
             var unit = ActivatorUtilities.CreateInstance(_provider, type) as UnitBase;
             unit.Context = context;
-            WrapPussy(method, unit, arguments, context);
+            WrapPussy(method, unit, builder.Build().Serve(method), context);
         }
     }
 
+    [Obsolete]
     private object[] PrepareInjectionsForPussy(MessageContext context, IReadOnlyDictionary<string, MessageChain> properties,
         MethodInfo method)
     {
