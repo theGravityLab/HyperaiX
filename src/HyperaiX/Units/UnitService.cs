@@ -48,7 +48,7 @@ public class UnitService
         }
     }
 
-    private void LickPussy(MessageContext context, ActionFieldAttributeBase extractor, MethodInfo method, Type type)
+    private void LickPussy(MessageContext context, ActionFieldAttributeBase extractor, MethodInfo method, Type unitType)
     {
         var success = extractor.Match(context, out var properties);
         if (success)
@@ -56,12 +56,16 @@ public class UnitService
             var builder = Bank.Builder();
             foreach (var property in properties)
             {
-                builder.Property().Named(property.Key).Typed(typeof(MessageChain))
+                builder.Property().Named(property.Key).Typed(typeof(MessageChain)).WithObject(property.Value)
                     .HasTypeAdapted(typeof(MessageChain), (it, type) => it)
                     .HasTypeAdapted(typeof(MessageElement), (it, type) => ((MessageChain)it).First(x => x.GetType() == type))
                     .HasTypeAdapted(typeof(string), (it, type) => it.ToString());
             }
-            var unit = ActivatorUtilities.CreateInstance(_provider, type) as UnitBase;
+            foreach(var (type, value) in context.GetType().GetProperties().Select(x => (x.PropertyType, x.GetValue(context))))
+            {
+                builder.Property().Typed(type).WithObject(value);
+            }
+            var unit = ActivatorUtilities.CreateInstance(_provider, unitType) as UnitBase;
             unit.Context = context;
             WrapPussy(method, unit, builder.Build().Serve(method), context);
         }
