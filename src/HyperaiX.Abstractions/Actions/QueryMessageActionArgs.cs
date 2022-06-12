@@ -7,5 +7,5 @@ public class QueryMessageActionArgs : GenericActionArgs
 {
     public override Type Output => typeof(QueryMessageReceipt);
 
-    public long MessageId { get; set; }
+    public string MessageId { get; set; }
 }

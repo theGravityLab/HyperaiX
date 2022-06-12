@@ -14,7 +14,7 @@ public static class ApiClientExtensions
         return await Task.Run(() => client.Write(args));
     }
 
-    public static async Task<long> SendFriendMessageAsync(this IApiClient client, long friendId, MessageChain chain)
+    public static async Task<string> SendFriendMessageAsync(this IApiClient client, long friendId, MessageChain chain)
     {
         var args = new FriendMessageActionArgs
         {
@@ -28,7 +28,7 @@ public static class ApiClientExtensions
         };
     }
 
-    public static async Task<long> SendGroupMessageAsync(this IApiClient client, long groupId, MessageChain chain)
+    public static async Task<string> SendGroupMessageAsync(this IApiClient client, long groupId, MessageChain chain)
     {
         var args = new GroupMessageActionArgs
         {
@@ -82,7 +82,7 @@ public static class ApiClientExtensions
         };
     }
 
-    public static async Task<MessageChain> GetMessageAsync(this IApiClient client, long messageId)
+    public static async Task<MessageChain> GetMessageAsync(this IApiClient client, string messageId)
     {
         var args = new QueryMessageActionArgs()
         {

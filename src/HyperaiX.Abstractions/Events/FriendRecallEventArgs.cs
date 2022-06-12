@@ -4,6 +4,6 @@ namespace HyperaiX.Abstractions.Events;
 
 public class FriendRecallEventArgs : GenericEventArgs
 {
-    public long MessageId { get; set; }
+    public string MessageId { get; set; }
     public Friend User { get; set; }
 }
