@@ -42,7 +42,7 @@ public class HyperaiXServer : IHostedService
     {
         while (!token.IsCancellationRequested)
         {
-            var evt = _client.Read();
+            var evt = _client.Read(token);
             _configuration.Pipeline(evt, _provider);
         }
 
