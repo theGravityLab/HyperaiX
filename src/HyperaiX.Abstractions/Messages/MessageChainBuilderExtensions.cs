@@ -29,7 +29,7 @@ public static class MessageChainBuilderExtensions
         return builder.Add(image);
     }
 
-    public static MessageChainBuilder AddQuote(this MessageChainBuilder builder, long target)
+    public static MessageChainBuilder AddQuote(this MessageChainBuilder builder, string target)
     {
         var quote = new Quote(target);
         return builder.Add(quote);

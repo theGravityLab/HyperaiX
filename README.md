@@ -5,7 +5,7 @@
 ```csharp
 // SomeUnit.cs
 [Receiver(MessageEventType.Group | MessageEventType.Friend)]
-[Handler("!reply {image:Image}")]
+[Extract("!reply {image:Image}")]
 public async Task ReplyImageAsync(Image image, MessageChain chain)
 {
     var builder = chain.CanBeReplied() ? chain.MakeReply() : new MessageChainBuilder();
@@ -14,7 +14,7 @@ public async Task ReplyImageAsync(Image image, MessageChain chain)
 }
 
 [Receiver(MessageEventType.Group | MessageEventType.Friend)]
-[Handler("{owner}/{repo}")]
+[Extract("{owner}/{repo}")]
 public Image Github(string owner, string repo)
 {
     return new Image(new Uri($"https://opengraph.githubassets.com/0/{owner}/{repo}"));

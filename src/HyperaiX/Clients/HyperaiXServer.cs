@@ -27,6 +27,7 @@ public class HyperaiXServer : IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         var longRunning = new Thread(() => Pull(tokenSource.Token));
+        longRunning.Name = "Event Pulling";
         longRunning.Start();
         _logger.LogInformation("HyperaiX Server starts running");
         return Task.CompletedTask;
