@@ -141,9 +141,9 @@ public class UnitService
             IEnumerable<MessageElement> it => new MessageChain(it),
             MessageChainBuilder it => it.Build(),
             MessageElement it => MessageChain.Construct(it),
-            _ => throw new NotImplementedException()
+            _ => MessageChain.Construct(new Plain(result.ToString()))
         };
         await context.SendMessageAsync(chain);
-        _logger.LogInformation("Forwarded by ReturnType({Type} to {Type})", result.GetType().Name, context.Type);
+        _logger.LogInformation("Forwarded by ReturnType({Type} to {Message})", result.GetType(), context.Type);
     }
 }
