@@ -66,7 +66,7 @@ dotnet add package HyperaiX.Abstractions
 
 日后实现
 
-### Unit Scope
+### Unit Scope(弃案，Unit不应该用来保存状态)
 
 通过切换 Unit 的上下文实现对于一个 Unit 在同一时间只为一个用户提供服务。也就是说一个或不同的 Unit 中的 UnitContext 会保证在同一个用户下一致。
 
@@ -78,3 +78,9 @@ Unit Context 保存了 Unit 的状态，其中有 Unit 的持久化数据(kv数�
 - 单Unit多用户
 - 多Unit单用户
 - 全局共享
+
+### Session(完成)
+
+Unit Service 会提供一个集中保存状态的地方，并用`Session`表示，可以被注入到 Action。
+
+`PersistenceAttribute`标记的 Action 就可以获得的`Session`。
