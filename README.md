@@ -84,3 +84,7 @@ Unit Context 保存了 Unit 的状态，其中有 Unit 的持久化数据(kv数�
 Unit Service 会提供一个集中保存状态的地方，并用`Session`表示，可以被注入到 Action。
 
 `PersistenceAttribute`标记的 Action 就可以获得的`Session`。
+
+### Unit 的事件捕获支持
+
+等到 C# 10 正式出来支持 Generic Attribute 之后再搞。
