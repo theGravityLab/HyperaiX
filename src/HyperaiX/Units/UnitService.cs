@@ -92,11 +92,11 @@ public class UnitService
 
             var unit = ActivatorUtilities.CreateInstance(_provider, type) as UnitBase;
             unit.Context = context;
-            ExecuteUnitAsync(method, unit, builder.Build(), context);
+            ExecuteAsyncUnit(method, unit, builder.Build(), context);
         }
     }
 
-    private void ExecuteUnitAsync(MethodInfo method, UnitBase unit, Bank bank, MessageContext context)
+    private void ExecuteAsyncUnit(MethodInfo method, UnitBase unit, Bank bank, MessageContext context)
     {
         var arguments = bank.Serve(method);
         if (method.GetCustomAttribute<AsyncStateMachineAttribute>() != null)
@@ -104,26 +104,27 @@ public class UnitService
             {
                 if (method.Invoke(unit, arguments) is not Task task) return;
                 await task.ConfigureAwait(false);
-                var result = task.GetType().ContainsGenericParameters
-                    ? task.GetType().GetProperty("Result")?.GetValue(task)
-                    : null;
-                if (task.IsCompletedSuccessfully)
+                var result = task.GetType().GetProperty("Result")?.GetValue(task);
+                if (result != null)
                 {
-                    await ForwardActionResultAsync(result, context);
-                }
-                else
-                {
-                    var exception = task.Exception;
-                    _logger.LogError(exception, "Exception caught while running async method: {MethodName}",
-                        method.Name);
+                    if (task.IsCompletedSuccessfully)
+                    {
+                        await ForwardActionResultAsync(result, context);
+                    }
+                    else
+                    {
+                        var exception = task.Exception;
+                        _logger.LogError(exception, "Exception caught while running async method: {MethodName}",
+                            method.Name);
+                    }
                 }
             }).ConfigureAwait(false);
         else
             Task.Run(async () =>
             {
-                if (method.Invoke(unit, arguments) is not object result) return;
+                if (method.Invoke(unit, arguments) is not { } result) return;
                 await ForwardActionResultAsync(result, context);
-            });
+            }).ConfigureAwait(false);
     }
 
     private async Task ForwardActionResultAsync(object result, MessageContext context)
