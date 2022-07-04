@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <PackageId>HyperaiX</PackageId>
-        <Version>0.11.1</Version>
+        <Version>0.11.2</Version>
         <TargetFramework>net6.0</TargetFramework>
         <RepositoryUrl>https://github.com/theGravityLab/HyperaiX</RepositoryUrl>
         <Authors>GravityLab, Chien Zhang</Authors>
@@ -11,15 +11,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="IBuilder" Version="0.1.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+        <PackageReference Include="IBuilder" Version="0.1.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\HyperaiX.Abstractions\HyperaiX.Abstractions.csproj" />
-        <ProjectReference Include="..\..\..\duffet\src\Duffet\Duffet.csproj" />
+        <ProjectReference Include="..\HyperaiX.Abstractions\HyperaiX.Abstractions.csproj"/>
+        <ProjectReference Include="..\..\..\duffet\src\Duffet\Duffet.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -5,15 +5,13 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Duffet;
 using HyperaiX.Abstractions;
-using HyperaiX.Abstractions.Events;
 using HyperaiX.Abstractions.Messages;
 using HyperaiX.Abstractions.Messages.ConcreteModels;
 using HyperaiX.Units.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Duffet;
-using HyperaiX.Abstractions.Relations;
 
 namespace HyperaiX.Units;
 
@@ -36,7 +34,7 @@ public class UnitService
         _provider = provider;
         _logger = logger;
 
-        manager = new(_provider, _methods.Select(x => x.Item1));
+        manager = new LifecycleManager(_provider, _methods.Select(x => x.Item1));
     }
 
     public void Push(MessageContext context)
@@ -58,7 +56,6 @@ public class UnitService
             var result = action.Match(context, out var dict);
             if (result)
                 foreach (var d in dict)
-                {
                     builder.Property()
                         .Named(d.Key)
                         .Typed(typeof(MessageChain))
@@ -67,7 +64,6 @@ public class UnitService
                         .HasTypeAdapted(typeof(MessageElement),
                             (it, t) => ((MessageChain)it).First(x => x.GetType() == t))
                         .HasTypeAdapted(typeof(string), (it, _) => it.ToString());
-                }
 
             return result;
         });
@@ -75,9 +71,7 @@ public class UnitService
         {
             foreach (var (t, value) in context.GetType().GetProperties()
                          .Select(x => (x.PropertyType, x.GetValue(context))))
-            {
-                builder.Property().Typed(t).WithObject(value);
-            }
+                builder.Property().Typed(t).HasTypeAdapted(value.GetType(), (o, t) => o).WithObject(value);
 
             var persistence = method.GetCustomAttribute<PersistenceAttribute>();
             if (persistence != null)

@@ -8,13 +8,7 @@ namespace HyperaiX.Units;
 
 public class Session
 {
-    public bool EndOfLife { get; private set; }
-    public IDictionary<string, object> Data { get; } = new Dictionary<string, object>();
-
     private static readonly List<Session> root = new();
-
-    internal MethodInfo Method { get; init; }
-    internal Signature Signature { get; init; }
 
     private Session(MethodInfo info, Signature signature)
     {
@@ -24,6 +18,12 @@ public class Session
 
         root.Add(this);
     }
+
+    public bool EndOfLife { get; private set; }
+    public IDictionary<string, object> Data { get; } = new Dictionary<string, object>();
+
+    internal MethodInfo Method { get; init; }
+    internal Signature Signature { get; init; }
 
     internal static Session Create(MessageContext context, MethodInfo method, SharingScope scope)
     {
@@ -36,7 +36,7 @@ public class Session
             });
         if (session == default)
         {
-            session = new(method, scope switch
+            session = new Session(method, scope switch
             {
                 SharingScope.Friend => Signature.FromFriend(context.Sender.Identity),
                 SharingScope.Member => Signature.FromMember(context.Group.Identity, context.Sender.Identity),

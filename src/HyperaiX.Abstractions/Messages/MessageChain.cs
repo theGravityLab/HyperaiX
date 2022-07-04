@@ -16,7 +16,7 @@ public class MessageChain : IEnumerable<MessageElement>
         InnerElements = elements;
     }
 
-    internal IEnumerable<MessageElement> InnerElements { get; }
+    private IEnumerable<MessageElement> InnerElements { get; }
 
     public IEnumerator<MessageElement> GetEnumerator()
     {
@@ -30,7 +30,7 @@ public class MessageChain : IEnumerable<MessageElement>
 
     public static MessageChain Construct(params MessageElement[] chain)
     {
-        return new(chain);
+        return new MessageChain(chain);
     }
 
     public override bool Equals(object obj)

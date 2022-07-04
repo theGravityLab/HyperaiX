@@ -23,9 +23,9 @@ public class Signature
         }
 
         return prefix == member.GroupIdentity.ToString() && (postfix == "*" ||
-                                                                    member.GroupIdentity.ToString() ==
-                                                                    prefix &&
-                                                                    member.Identity.ToString() == postfix);
+                                                             (member.GroupIdentity.ToString() ==
+                                                              prefix &&
+                                                              member.Identity.ToString() == postfix));
     }
 
     public bool Match(Friend friend)
@@ -43,6 +43,8 @@ public class Signature
 
         return false;
     }
+    
+    public override string ToString() => Expression;
 
     public static Signature FromGroup(long groupId)
     {

@@ -5,5 +5,4 @@ public enum SharingScope
     Friend,
     Member,
     Group
-    
 }

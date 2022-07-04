@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <PackageId>HyperaiX.Abstractions</PackageId>
-        <Version>0.11.1</Version>
+        <Version>0.11.2</Version>
         <RepositoryUrl>https://github.com/theGravityLab/HyperaiX</RepositoryUrl>
         <Authors>GravityLab, Chien Zhang</Authors>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="IBuilder" Version="0.1.0" />
+        <PackageReference Include="IBuilder" Version="0.1.0"/>
     </ItemGroup>
 
 </Project>

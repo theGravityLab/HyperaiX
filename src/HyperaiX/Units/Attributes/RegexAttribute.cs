@@ -31,10 +31,10 @@ public class RegexAttribute : ActionFieldAttributeBase
         var props = new Dictionary<string, MessageChain>();
         if (match.Success)
             foreach (Group group in match.Groups)
-                if (@group.Success && @group.Name != string.Empty)
+                if (group.Success && group.Name != string.Empty)
                 {
-                    var key = @group.Name;
-                    var value = @group.Value;
+                    var key = group.Name;
+                    var value = group.Value;
 
                     props.Add(key, context.Message.Extract(value));
                 }

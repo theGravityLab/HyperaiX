@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using HyperaiX.Abstractions.Actions;
 using HyperaiX.Abstractions.Messages;
@@ -24,7 +23,7 @@ public static class ApiClientExtensions
         return await client.WriteAsync(args) switch
         {
             MessageReceipt receipt => receipt.MessageId,
-            _ => default,
+            _ => default
         };
     }
 
@@ -38,7 +37,7 @@ public static class ApiClientExtensions
         return await client.WriteAsync(args) switch
         {
             MessageReceipt receipt => receipt.MessageId,
-            _ => default,
+            _ => default
         };
     }
 
@@ -51,7 +50,7 @@ public static class ApiClientExtensions
         return await client.WriteAsync(args) switch
         {
             QueryGroupReceipt receipt => receipt.Group,
-            _ => default,
+            _ => default
         };
     }
 
@@ -64,7 +63,7 @@ public static class ApiClientExtensions
         return await client.WriteAsync(args) switch
         {
             QueryFriendReceipt receipt => receipt.Friend,
-            _ => default,
+            _ => default
         };
     }
 
@@ -78,20 +77,20 @@ public static class ApiClientExtensions
         return await client.WriteAsync(args) switch
         {
             QueryMemberReceipt receipt => receipt.Member,
-            _ => default,
+            _ => default
         };
     }
 
     public static async Task<MessageChain> GetMessageAsync(this IApiClient client, string messageId)
     {
-        var args = new QueryMessageActionArgs()
+        var args = new QueryMessageActionArgs
         {
             MessageId = messageId
         };
         return await client.WriteAsync(args) switch
         {
             QueryMessageReceipt receipt => receipt.Message,
-            _ => default,
+            _ => default
         };
     }
 

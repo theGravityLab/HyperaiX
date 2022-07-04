@@ -10,7 +10,7 @@ public class UnitServiceConfigurationBuilder : IBuilder<UnitServiceConfiguration
 
     public UnitServiceConfiguration Build()
     {
-        return new()
+        return new UnitServiceConfiguration
         {
             Units = units
         };
