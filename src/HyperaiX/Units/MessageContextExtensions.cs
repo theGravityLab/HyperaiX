@@ -10,10 +10,10 @@ public static class MessageContextExtensions
         var reply = context.Message.CanBeReplied()
             ? context.Message.MakeReply().AddRange(chain).Build()
             : new MessageChainBuilder().AddRange(chain).Build();
-        await SendMessageAsync(context, reply);
+        await SendAsync(context, reply);
     }
 
-    public static async Task SendMessageAsync(this MessageContext context, MessageChain chain)
+    public static async Task SendAsync(this MessageContext context, MessageChain chain)
     {
         if (context.Group == null)
             await context.Client.SendFriendMessageAsync(context.Sender.Identity, chain);

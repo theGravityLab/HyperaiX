@@ -10,40 +10,48 @@ public class Signature
     public string Expression { get; set; }
     public long Destination { get; set; }
 
-    public bool Match(Member member)
+
+    public bool Match(User user)
     {
-        var prefix = Expression.Substring(0, Expression.IndexOf(':'));
-        var postfix = Expression.Substring(prefix.Length + 1);
-
-        if (prefix == "*")
+        switch (user)
         {
-            if (long.TryParse(postfix, out var result)) return result == member.Identity;
+            case Friend it:
+            {
+                var prefix = Expression.Substring(0, Expression.IndexOf(':'));
+                var postfix = Expression.Substring(prefix.Length + 1);
 
-            return false;
+                if (prefix == "*") return false;
+                if (prefix == "_")
+                {
+                    if (long.TryParse(postfix, out var result)) return result == it.Identity;
+
+                    return postfix == "*";
+                }
+
+                return false;
+            }
+            case Member it:
+            {
+                var prefix = Expression.Substring(0, Expression.IndexOf(':'));
+                var postfix = Expression.Substring(prefix.Length + 1);
+
+                if (prefix == "*")
+                {
+                    if (long.TryParse(postfix, out var result)) return result == it.Identity;
+
+                    return false;
+                }
+
+                return prefix == it.GroupIdentity.ToString() && (postfix == "*" ||
+                                                                 (it.GroupIdentity.ToString() ==
+                                                                  prefix &&
+                                                                  it.Identity.ToString() == postfix));
+            }
+            default:
+                return false;
         }
-
-        return prefix == member.GroupIdentity.ToString() && (postfix == "*" ||
-                                                             (member.GroupIdentity.ToString() ==
-                                                              prefix &&
-                                                              member.Identity.ToString() == postfix));
     }
 
-    public bool Match(Friend friend)
-    {
-        var prefix = Expression.Substring(0, Expression.IndexOf(':'));
-        var postfix = Expression.Substring(prefix.Length + 1);
-
-        if (prefix == "*") return false;
-        if (prefix == "_")
-        {
-            if (long.TryParse(postfix, out var result)) return result == friend.Identity;
-
-            return postfix == "*";
-        }
-
-        return false;
-    }
-    
     public override string ToString() => Expression;
 
     public static Signature FromGroup(long groupId)

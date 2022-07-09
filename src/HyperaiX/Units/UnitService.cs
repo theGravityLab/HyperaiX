@@ -69,6 +69,7 @@ public class UnitService
         });
         if (success)
         {
+            _logger.LogDebug("Unit action triggered: {Method}@{Unit}", method.Name, type.Name);
             foreach (var (t, value) in context.GetType().GetProperties()
                          .Select(x => (x.PropertyType, x.GetValue(context))))
                 builder.Property().Typed(t).HasTypeAdapted(value.GetType(), (o, t) => o).WithObject(value);
@@ -138,7 +139,7 @@ public class UnitService
             MessageElement it => MessageChain.Construct(it),
             _ => MessageChain.Construct(new Plain(result.ToString()))
         };
-        await context.SendMessageAsync(chain);
-        _logger.LogInformation("Forwarded by ReturnType({Type} to {Message})", result.GetType(), context.Type);
+        await context.SendAsync(chain);
+        _logger.LogDebug("Forwarded by ReturnType({Type} to {Message})", result.GetType(), context.Type);
     }
 }

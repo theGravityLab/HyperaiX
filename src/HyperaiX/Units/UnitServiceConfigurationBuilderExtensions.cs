@@ -5,7 +5,7 @@ namespace HyperaiX.Units;
 
 public static class UnitServiceConfigurationBuilderExtensions
 {
-    public static UnitServiceConfigurationBuilder MapUnits(this UnitServiceConfigurationBuilder builder)
+    public static UnitServiceConfigurationBuilder LookForUnits(this UnitServiceConfigurationBuilder builder)
     {
         var entries = AssemblyLoadContext.All.SelectMany(x => x.Assemblies).SelectMany(x => x.GetExportedTypes())
             .Where(x => x.IsAssignableTo(typeof(UnitBase)));
