@@ -52,7 +52,10 @@ public class Signature
         }
     }
 
-    public override string ToString() => Expression;
+    public override string ToString()
+    {
+        return Expression;
+    }
 
     public static Signature FromGroup(long groupId)
     {

@@ -85,18 +85,19 @@ public class UnitService
                     .WithObject(session);
             }
 
-            var unit = ActivatorUtilities.CreateInstance(_provider, type) as UnitBase;
-            unit.Context = context;
-            ExecuteAsyncUnit(method, unit, builder.Build(), context);
+            ExecuteAsyncUnit(method, type, builder.Build(), context);
         }
     }
 
-    private void ExecuteAsyncUnit(MethodInfo method, UnitBase unit, Bank bank, MessageContext context)
+    private void ExecuteAsyncUnit(MethodInfo method, Type unitType, Bank bank, MessageContext context)
     {
         var arguments = bank.Serve(method);
         if (method.GetCustomAttribute<AsyncStateMachineAttribute>() != null)
             Task.Run(async () =>
             {
+                await using var scope = _provider.CreateAsyncScope();
+                var unit = ActivatorUtilities.CreateInstance(_provider, unitType) as UnitBase;
+                unit!.Context = context;
                 if (method.Invoke(unit, arguments) is not Task task) return;
                 await task.ConfigureAwait(false);
                 var result = task.GetType().GetProperty("Result")?.GetValue(task);
@@ -117,6 +118,9 @@ public class UnitService
         else
             Task.Run(async () =>
             {
+                await using var scope = _provider.CreateAsyncScope();
+                var unit = ActivatorUtilities.CreateInstance(_provider, unitType) as UnitBase;
+                unit!.Context = context;
                 if (method.Invoke(unit, arguments) is not { } result) return;
                 await ForwardActionResultAsync(result, context);
             }).ConfigureAwait(false);

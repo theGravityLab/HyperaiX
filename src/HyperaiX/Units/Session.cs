@@ -35,16 +35,12 @@ public class Session
                 _ => false
             });
         if (session == default)
-        {
             session = new Session(method, scope switch
             {
                 SharingScope.Friend => Signature.FromFriend(context.Sender.Identity),
                 SharingScope.Member => Signature.FromMember(context.Group.Identity, context.Sender.Identity),
                 SharingScope.Group => Signature.FromGroup(context.Group.Identity)
             });
-
-            root.Add(session);
-        }
 
         return session;
     }
