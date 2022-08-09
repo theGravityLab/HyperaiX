@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <PackageId>HyperaiX</PackageId>
-        <Version>0.11.4</Version>
+        <Version>0.11.5</Version>
         <TargetFramework>net6.0</TargetFramework>
         <RepositoryUrl>https://github.com/theGravityLab/HyperaiX</RepositoryUrl>
         <Authors>GravityLab, Chien Zhang</Authors>

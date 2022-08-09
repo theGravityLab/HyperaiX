@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -43,8 +44,9 @@ public class HyperaiXServer : IHostedService
     {
         while (!token.IsCancellationRequested)
         {
+            using var scope = _provider.CreateScope();
             var evt = _client.Read(token);
-            _configuration.Pipeline(evt, _provider);
+            _configuration.Pipeline(evt, scope.ServiceProvider);
         }
 
         _logger.LogInformation("task cancelled");

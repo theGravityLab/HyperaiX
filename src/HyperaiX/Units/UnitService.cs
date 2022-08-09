@@ -56,14 +56,40 @@ public class UnitService
             var result = action.Match(context, out var dict);
             if (result)
                 foreach (var d in dict)
-                    builder.Property()
+                {
+                    var property = builder.Property()
                         .Named(d.Key)
                         .Typed(typeof(MessageChain))
                         .WithObject(d.Value)
                         .HasTypeAdapted(typeof(MessageChain), (it, _) => it)
-                        .HasTypeAdapted(typeof(MessageElement),
-                            (it, t) => ((MessageChain)it).First(x => x.GetType() == t))
+                        // .HasTypeAdapted(typeof(MessageElement),
+                        //     (it, t) => ((MessageChain)it).First(x => x.GetType() == t))
                         .HasTypeAdapted(typeof(string), (it, _) => it.ToString());
+                    if (d.Value.Count() == 1)
+                    {
+                        var first = d.Value.First();
+                        property.HasTypeAdapted(first.GetType(), (_, _) => first);
+                        if (first is Plain plain)
+                        {
+                            if (int.TryParse(plain.Text, out var i)) property.HasTypeAdapted(typeof(int), (_, _) => i);
+                            if (long.TryParse(plain.Text, out var l))
+                                property.HasTypeAdapted(typeof(long), (_, _) => l);
+
+                            if (bool.TryParse(plain.Text, out var b))
+                                property.HasTypeAdapted(typeof(bool), (_, _) => b);
+
+                            if (uint.TryParse(plain.Text, out var ui))
+                                property.HasTypeAdapted(typeof(uint), (_, _) => ui);
+                            if (ulong.TryParse(plain.Text, out var ul))
+                                property.HasTypeAdapted(typeof(uint), (_, _) => ul);
+                            if (char.TryParse(plain.Text, out var c))
+                                property.HasTypeAdapted(typeof(uint), (_, _) => c);
+
+                            if (byte.TryParse(plain.Text, out var bt))
+                                property.HasTypeAdapted(typeof(byte), (_, _) => bt);
+                        }
+                    }
+                }
 
             return result;
         });
@@ -85,45 +111,40 @@ public class UnitService
                     .WithObject(session);
             }
 
-            ExecuteAsyncUnit(method, type, builder.Build(), context);
+            var unit = ActivatorUtilities.CreateInstance(_provider, type) as UnitBase;
+            ExecuteAsyncUnit(method, unit, builder.Build(), context);
         }
     }
 
-    private void ExecuteAsyncUnit(MethodInfo method, Type unitType, Bank bank, MessageContext context)
+    private void ExecuteAsyncUnit(MethodInfo method, UnitBase unit, Bank bank, MessageContext context)
     {
         var arguments = bank.Serve(method);
         if (method.GetCustomAttribute<AsyncStateMachineAttribute>() != null)
-            Task.Run(async () =>
+        {
+            unit!.Context = context;
+            if (method.Invoke(unit, arguments) is not Task task) return;
+            task.Wait();
+            var result = task.GetType().GetProperty("Result")?.GetValue(task);
+            if (result != null)
             {
-                await using var scope = _provider.CreateAsyncScope();
-                var unit = ActivatorUtilities.CreateInstance(_provider, unitType) as UnitBase;
-                unit!.Context = context;
-                if (method.Invoke(unit, arguments) is not Task task) return;
-                await task.ConfigureAwait(false);
-                var result = task.GetType().GetProperty("Result")?.GetValue(task);
-                if (result != null)
+                if (task.IsCompletedSuccessfully)
                 {
-                    if (task.IsCompletedSuccessfully)
-                    {
-                        await ForwardActionResultAsync(result, context);
-                    }
-                    else
-                    {
-                        var exception = task.Exception;
-                        _logger.LogError(exception, "Exception caught while running async method: {MethodName}",
-                            method.Name);
-                    }
+                    ForwardActionResultAsync(result, context).Wait();
                 }
-            }).ConfigureAwait(false);
+                else
+                {
+                    var exception = task.Exception;
+                    _logger.LogError(exception, "Exception caught while running async method: {MethodName}",
+                        method.Name);
+                }
+            }
+        }
         else
-            Task.Run(async () =>
-            {
-                await using var scope = _provider.CreateAsyncScope();
-                var unit = ActivatorUtilities.CreateInstance(_provider, unitType) as UnitBase;
-                unit!.Context = context;
-                if (method.Invoke(unit, arguments) is not { } result) return;
-                await ForwardActionResultAsync(result, context);
-            }).ConfigureAwait(false);
+        {
+            unit!.Context = context;
+            if (method.Invoke(unit, arguments) is not { } result) return;
+            ForwardActionResultAsync(result, context).Wait();
+        }
     }
 
     private async Task ForwardActionResultAsync(object result, MessageContext context)
