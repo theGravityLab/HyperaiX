@@ -98,7 +98,7 @@ public class UnitService
             _logger.LogDebug("Unit action triggered: {Method}@{Unit}", method.Name, type.Name);
             foreach (var (t, value) in context.GetType().GetProperties()
                          .Select(x => (x.PropertyType, x.GetValue(context))))
-                builder.Property().Typed(t).HasTypeAdapted(value.GetType(), (o, t) => o).WithObject(value);
+                builder.Property().Typed(t).HasTypeAdapted(value.GetType(), (o, _) => o).WithObject(value);
 
             var persistence = method.GetCustomAttribute<PersistenceAttribute>();
             if (persistence != null)
