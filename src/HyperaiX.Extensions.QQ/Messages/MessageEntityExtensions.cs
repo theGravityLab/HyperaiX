@@ -1,0 +1,7 @@
+﻿namespace HyperaiX.Extensions.QQ.Messages;
+
+public static class MessageEntityExtensions
+{
+    public const string ATTACHMENT_ID = "qq-id";
+    public const string ATTACHMENT_REFERENCE = "qq-ref";
+}

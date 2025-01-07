@@ -1,8 +1,6 @@
-using System;
+﻿namespace HyperaiX.Abstractions.Events;
 
-namespace HyperaiX.Abstractions.Events;
-
-public abstract class GenericEventArgs : EventArgs
+public record GenericEventArgs()
 {
-    public DateTime Time { get; set; } = DateTime.Now;
+    public DateTimeOffset Time { get; } = DateTimeOffset.UtcNow;
 }

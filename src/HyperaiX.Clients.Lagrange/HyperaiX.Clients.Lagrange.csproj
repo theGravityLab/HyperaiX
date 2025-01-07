@@ -6,4 +6,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\HyperaiX.Abstractions\HyperaiX.Abstractions.csproj" />
+      <ProjectReference Include="..\HyperaiX.Extensions.QQ\HyperaiX.Extensions.QQ.csproj" />
+    </ItemGroup>
+
 </Project>
