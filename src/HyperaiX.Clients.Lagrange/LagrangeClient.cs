@@ -1,5 +1,5 @@
 ﻿namespace HyperaiX.Clients.Lagrange;
 
-public class Class1
+public class LagrangeClient
 {
 }

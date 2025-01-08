@@ -1,3 +1,3 @@
 ﻿namespace HyperaiX.Abstractions.Messages.Payloads.Elements;
 
-public struct Text() : IMessageElement;
+public record Text(string Plain) : IMessageElement;

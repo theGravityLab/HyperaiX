@@ -1,3 +1,3 @@
 ﻿namespace HyperaiX.Abstractions.Receipts;
 
-public record GenericReceipt();
+public record GenericReceiptArgs();
