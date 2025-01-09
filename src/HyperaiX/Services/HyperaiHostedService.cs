@@ -1,6 +1,8 @@
-﻿using HyperaiX.Abstractions;
+﻿using System.Diagnostics;
+using HyperaiX.Abstractions;
 using HyperaiX.Abstractions.Events;
 using HyperaiX.Middlewares;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -24,16 +26,18 @@ public class HyperaiHostedService : IHostedService
     private readonly Thread _thread;
     private readonly CancellationTokenSource _cts;
 
-    public HyperaiHostedService(IServiceProvider provider,
+    public HyperaiHostedService(IServiceProvider provider, ModuleRegistry registry,
         IEndClient client,
-        IOptions<HyperaiHostedServiceOptions> options)
+        HyperaiHostedServiceConfiguration configuration)
     {
         _client = client;
+
+        #region Build Pipeline
 
         var head = new MiddlewareItem(new DummyMiddleware());
         var current = head;
 
-        foreach (var item in options.Value.Middlewares)
+        foreach (var item in configuration.Middlewares)
         {
             var middleware = (MiddlewareBase)ActivatorUtilities.CreateInstance(provider, item);
             current.Next = new MiddlewareItem(middleware);
@@ -41,8 +45,26 @@ public class HyperaiHostedService : IHostedService
         }
 
         _pipeline = head;
-        _thread = new Thread(Work);
-        _thread.Name = "HyperaiHostedService Polling Worker";
+
+        #endregion
+
+        #region Build Modules
+
+        var disabled = configuration.Configuration.GetSection("HyperaiX:Modules:Disabled").Get<string[]>() ?? [];
+
+        foreach (var builder in configuration.Modules)
+        {
+            var module = builder.Build();
+            module.IsActive = !disabled.Contains(module.Key);
+            registry.Add(module);
+        }
+
+        #endregion
+
+        _thread = new Thread(Work)
+        {
+            Name = "HyperaiHostedService Polling Worker"
+        };
         _cts = new CancellationTokenSource();
     }
 
@@ -58,6 +80,7 @@ public class HyperaiHostedService : IHostedService
         }
         catch (OperationCanceledException _)
         {
+            Debug.WriteLine("HyperaiX working thread is quitting...");
         }
     }
 
