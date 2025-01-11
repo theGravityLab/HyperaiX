@@ -10,6 +10,6 @@ public interface IEndClient
     Task DisconnectAsync(CancellationToken token);
 
     // 主线程去 Poll Read，拉到一个事件就让线程池去 Pipeline，对 Bot.OnEventAsync 和 Unit.Action 进行异步污染
-    GenericEventArgs Read(CancellationToken token);
-    GenericReceiptArgs Write(GenericActionArgs action, CancellationToken token = default);
+    ValueTask<GenericEventArgs> ReadAsync(CancellationToken token);
+    ValueTask<GenericReceiptArgs> WriteAsync(GenericActionArgs action, CancellationToken token = default);
 }

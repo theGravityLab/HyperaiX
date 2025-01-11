@@ -2,7 +2,15 @@
 
 namespace HyperaiX.Extensions.QQ.Roles;
 
-public record Member(ulong Id, string? Remark, string? NickName, Group Group) : IUser
+public record Member(
+    ulong Id,
+    string Name,
+    string? Remark,
+    string? NickName,
+    string? Title,
+    uint Level,
+    DateTimeOffset MuteExpiredAt,
+    Group Group) : IUser
 {
-    public string DisplayName => Remark ?? NickName ?? string.Empty;
+    public string DisplayName => Remark ?? NickName ?? Name;
 }

@@ -2,7 +2,7 @@
 
 namespace HyperaiX.Extensions.QQ.Roles;
 
-public record Friend(ulong Id, string? Remark) : IUser
+public record Friend(ulong Id, string Name, string? Remark) : IUser
 {
-    public string DisplayName => Remark ?? string.Empty;
+    public string DisplayName => Remark ?? Name;
 }

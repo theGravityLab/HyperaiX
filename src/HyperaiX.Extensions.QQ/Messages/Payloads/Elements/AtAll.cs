@@ -2,4 +2,4 @@
 
 namespace HyperaiX.Extensions.QQ.Messages.Payloads.Elements;
 
-public record At(ulong MemberId, string Display) : IMessageElement;
+public record AtAll() : IMessageElement;

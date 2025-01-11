@@ -23,7 +23,6 @@ public class HyperaiHostedService : IHostedService
     private readonly IEndClient _client;
 
     private readonly MiddlewareItem _pipeline;
-    private readonly Thread _thread;
     private readonly CancellationTokenSource _cts;
 
     public HyperaiHostedService(IServiceProvider provider, ModuleRegistry registry,
@@ -61,21 +60,20 @@ public class HyperaiHostedService : IHostedService
 
         #endregion
 
-        _thread = new Thread(Work)
-        {
-            Name = "HyperaiHostedService Polling Worker"
-        };
         _cts = new CancellationTokenSource();
     }
 
-    private void Work()
+    private async Task WorkAsync()
     {
         try
         {
             while (!_cts.IsCancellationRequested)
             {
-                var evt = _client.Read(_cts.Token);
-                Task.Run(() => _pipeline.Process(evt));
+                var evt = await _client.ReadAsync(_cts.Token);
+                // 并发流水线
+                // _ = Task.Run(() => _pipeline.Process(evt));
+                // 串行
+                _pipeline.Process(evt);
             }
         }
         catch (OperationCanceledException _)
@@ -88,7 +86,7 @@ public class HyperaiHostedService : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await _client.ConnectAsync(cancellationToken);
-        _thread.Start();
+        _ = Task.Run(WorkAsync, CancellationToken.None);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)

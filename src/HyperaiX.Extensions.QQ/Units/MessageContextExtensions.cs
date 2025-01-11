@@ -12,7 +12,7 @@ public static class MessageContextExtensions
         var attachments = message.Attachments.ToDictionary();
         attachments[MessageEntityExtensions.ATTACHMENT_REFERENCE] =
             message.Attachments[MessageEntityExtensions.ATTACHMENT_ID];
-        context.Client.Write(new SendMessageActionArgs(context.Chat, message with
+        context.Client.WriteAsync(new SendMessageActionArgs(context.Chat, message with
         {
             Attachments = attachments
         }));
