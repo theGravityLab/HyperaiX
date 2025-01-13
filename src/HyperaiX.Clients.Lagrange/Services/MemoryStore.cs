@@ -1,9 +1,9 @@
-﻿using HyperaiX.Extensions.QQ.Roles;
+﻿using HyperaiX.Clients.Lagrange.Utilties;
+using HyperaiX.Extensions.QQ.Roles;
 using Lagrange.Core;
 using Lagrange.Core.Common.Entity;
 using Lagrange.Core.Common.Interface.Api;
 using Microsoft.Extensions.Caching.Memory;
-using HyperaiX.Clients.Lagrange.Utilties;
 
 namespace HyperaiX.Clients.Lagrange.Services;
 
@@ -22,10 +22,7 @@ public class MemoryStore(IMemoryCache cache)
         {
             var gen = ModelHelper.ToGroup(group.GroupUin, group);
             var members = await factory.FetchMembers(group.GroupUin);
-            foreach (var member in members)
-            {
-                gen.Members.Add(ModelHelper.ToMember(gen, member.Uin, member));
-            }
+            foreach (var member in members) gen.Members.Add(ModelHelper.ToMember(gen, member.Uin, member));
 
             cache.Set(gen.Id, gen, SlidingExpiration);
             if (gen.Id == groupId) rv = gen;

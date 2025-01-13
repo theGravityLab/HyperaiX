@@ -1,3 +1,3 @@
 ﻿namespace HyperaiX.Abstractions.Messages.Payloads;
 
-public record Unknown() : IMessagePayload;
+public record Unknown : IMessagePayload;

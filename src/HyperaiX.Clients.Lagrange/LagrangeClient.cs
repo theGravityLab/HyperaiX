@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json;
 using System.Threading.Channels;
 using HyperaiX.Abstractions;
 using HyperaiX.Abstractions.Actions;
@@ -8,6 +6,7 @@ using HyperaiX.Abstractions.Events;
 using HyperaiX.Abstractions.Receipts;
 using HyperaiX.Clients.Lagrange.Services;
 using HyperaiX.Clients.Lagrange.Utilties;
+using HyperaiX.Extensions.QQ.Receipts;
 using HyperaiX.Extensions.QQ.Roles;
 using Lagrange.Core;
 using Lagrange.Core.Common;
@@ -21,18 +20,18 @@ namespace HyperaiX.Clients.Lagrange;
 
 public class LagrangeClient : IEndClient
 {
-    private readonly ILogger _logger;
-    private readonly BotContext _context;
-    private readonly MemoryStore _store;
-
-    // 拉格朗日的事件是在 Task.Run 中发起的，发起线程未知，但至少 Writer 有多个且在线程池里
-    private readonly Channel<GenericEventArgs> _events =
-        Channel.CreateUnbounded<GenericEventArgs>(new UnboundedChannelOptions()
-            { SingleReader = true, SingleWriter = false, AllowSynchronousContinuations = false });
-
     private static readonly string DEVICEINFO_PATH = Path.Combine(Environment.CurrentDirectory, "lagrange.device.json");
     private static readonly string KEYSTORE_PATH = Path.Combine(Environment.CurrentDirectory, "lagrange.keystore.json");
     private static readonly string QRCODE_PATH = Path.Combine(Environment.CurrentDirectory, "lagrange.qrcode.png");
+    private readonly BotContext _context;
+
+    // 拉格朗日的事件是在 Task.Run 中发起的，发起线程未知，但至少 Writer 有多个且在线程池里
+    private readonly Channel<GenericEventArgs> _events =
+        Channel.CreateUnbounded<GenericEventArgs>(new UnboundedChannelOptions
+            { SingleReader = true, SingleWriter = false, AllowSynchronousContinuations = false });
+
+    private readonly ILogger _logger;
+    private readonly MemoryStore _store;
 
     public LagrangeClient(IOptions<LagrangeClientOptions> options, ILogger<LagrangeClient> logger, MemoryStore store)
     {
@@ -58,11 +57,11 @@ public class LagrangeClient : IEndClient
 
         if (deviceInfo is null)
         {
-            deviceInfo = new BotDeviceInfo()
+            deviceInfo = new BotDeviceInfo
             {
                 Guid = Guid.NewGuid(),
                 MacAddress = Enumerable.Range(0, 6).Select(x => (byte)Random.Shared.Next(256)).ToArray(),
-                DeviceName = $"OPPO A5",
+                DeviceName = "OPPO A5",
                 KernelVersion = "6.4",
                 SystemKernel = "Linux 6.4"
             };
@@ -77,6 +76,67 @@ public class LagrangeClient : IEndClient
         bot.Invoker.OnGroupMessageReceived += InvokerOnOnGroupMessageReceived;
 
         _context = bot;
+    }
+
+    public async Task ConnectAsync(CancellationToken token)
+    {
+        if (_context.UpdateKeystore().Uin == 0)
+        {
+            if (await _context.FetchQrCode() is var (_, bytes))
+            {
+                await File.WriteAllBytesAsync(QRCODE_PATH, bytes,
+                    token);
+                _logger.LogInformation("QrCode file was saved at {}.", QRCODE_PATH);
+                await _context.LoginByQrCode();
+                await File.WriteAllTextAsync(KEYSTORE_PATH, JsonSerializer.Serialize(_context.UpdateKeystore()), token);
+            }
+            else
+            {
+                _logger.LogError("Failed getting Login QrCode, entering sleeping mode.");
+            }
+        }
+        else
+        {
+            if (!await _context.LoginByPassword())
+                _logger.LogError("Failed getting logged in silently, please remove keystore file and restart.");
+        }
+
+        _logger.LogInformation("Logged in as {}", _context.UpdateKeystore().Uin);
+    }
+
+    public Task DisconnectAsync(CancellationToken token)
+    {
+        _events.Writer.Complete();
+        _context.Dispose();
+        return Task.CompletedTask;
+    }
+
+    public async ValueTask<GenericEventArgs> ReadAsync(CancellationToken token)
+    {
+        if (await _events.Reader.WaitToReadAsync(token)) return await _events.Reader.ReadAsync(token);
+
+        throw new OperationCanceledException();
+    }
+
+    public async ValueTask<GenericReceiptArgs> WriteAsync(GenericActionArgs action, CancellationToken token = default)
+    {
+        if (token.IsCancellationRequested) await ValueTask.FromCanceled<GenericReceiptArgs>(token);
+        switch (action)
+        {
+            case SendMessageActionArgs sendMessage:
+            {
+                var seq = (await _context.SendMessage(ModelHelper.FromMessage(sendMessage.Chat, sendMessage.Message)))
+                    .Sequence;
+                if (seq.HasValue)
+                    // MessageId 的类型是 Client 的属性，由 Client 确定而非 Extension，这里应该返回更为一般且由 HyperaiX.Abstractions 做去平台化 HashCode 类型的 Handle
+                    // 在拉格朗日中 Handle 类型为 ulong，且就是 Sequence，需要在发送时转换为 Sequence，接受时提取自 Sequence 不做类型转换
+                    return new SendMessageReceiptArgs(seq.Value);
+
+                throw new NotImplementedException("Should throw or just return ErrorReceiptArgs?");
+            }
+            default:
+                return new GenericReceiptArgs();
+        }
     }
 
     private void InvokerOnOnBotLogEvent(BotContext context, BotLogEvent e)
@@ -108,55 +168,5 @@ public class LagrangeClient : IEndClient
             var evt = new MessageEventArgs(group, member, message);
             _events.Writer.WriteAsync(evt);
         }
-    }
-
-    public async Task ConnectAsync(CancellationToken token)
-    {
-        if (_context.UpdateKeystore().Uin == 0)
-        {
-            if (await _context.FetchQrCode() is var (_, bytes))
-            {
-                await File.WriteAllBytesAsync(QRCODE_PATH, bytes,
-                    token);
-                _logger.LogInformation("QrCode file was saved at {}.", QRCODE_PATH);
-                await _context.LoginByQrCode();
-                await File.WriteAllTextAsync(KEYSTORE_PATH, JsonSerializer.Serialize(_context.UpdateKeystore()), token);
-            }
-            else
-            {
-                _logger.LogError("Failed getting Login QrCode, entering sleeping mode.");
-            }
-        }
-        else
-        {
-            if (!await _context.LoginByPassword())
-            {
-                _logger.LogError("Failed getting logged in silently, please remove keystore file and restart.");
-            }
-        }
-
-        _logger.LogInformation("Logged in as {}", _context.UpdateKeystore().Uin);
-    }
-
-    public Task DisconnectAsync(CancellationToken token)
-    {
-        _events.Writer.Complete();
-        _context.Dispose();
-        return Task.CompletedTask;
-    }
-
-    public async ValueTask<GenericEventArgs> ReadAsync(CancellationToken token)
-    {
-        if (await _events.Reader.WaitToReadAsync(token))
-        {
-            return await _events.Reader.ReadAsync(token);
-        }
-
-        throw new OperationCanceledException();
-    }
-
-    public ValueTask<GenericReceiptArgs> WriteAsync(GenericActionArgs action, CancellationToken token = default)
-    {
-        throw new NotImplementedException();
     }
 }

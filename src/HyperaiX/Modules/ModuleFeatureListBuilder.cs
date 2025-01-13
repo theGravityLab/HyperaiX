@@ -1,5 +1,7 @@
-﻿using HyperaiX.Abstractions.Bots;
+﻿using System.Reflection;
+using HyperaiX.Abstractions.Bots;
 using HyperaiX.Abstractions.Modules;
+using HyperaiX.Abstractions.Units;
 using HyperaiX.Modules.Features;
 
 namespace HyperaiX.Modules;
@@ -18,17 +20,37 @@ public class ModuleFeatureListBuilder(Type module) : IFeatureListBuilder
             foreach (var type in module.Assembly.GetExportedTypes().Where(x =>
                          x is { IsPublic: true, IsClass: true, IsAbstract: false } &&
                          x.IsAssignableTo(typeof(BotBase))))
-            {
+                if (type.FullName is not null && module.Namespace is not null &&
+                    type.FullName.StartsWith(module.Namespace))
+                    bot.BotTypes.Add(type);
+
+            rv.Add(typeof(BotFeature), bot);
+        }
+
+        if (GetMark<bool>(FeatureListBuilderExtensions.MARK_USE_UNITS))
+        {
+            var unit = new UnitFeature();
+            foreach (var type in module.Assembly.GetExportedTypes().Where(x =>
+                         x is { IsPublic: true, IsClass: true, IsAbstract: false } &&
+                         x.IsAssignableTo(typeof(UnitBase))))
                 if (type.FullName is not null && module.Namespace is not null &&
                     type.FullName.StartsWith(module.Namespace))
                 {
-                    bot.BotTypes.Add(type);
+                    var methods = type.GetMethods()
+                        .Where(x => x is { IsPublic: true, IsStatic: false, IsAbstract: false });
+                    foreach (var method in methods)
+                    {
+                        var receiver = method.GetCustomAttribute(typeof(ReceiveAttribute<>));
+                        if (receiver is not null)
+                        {
+                            var receiverType = receiver.GetType().GetGenericArguments().First();
+                            unit.Actions.Add(new UnitFeature.BoxedAction(receiverType, type, method));
+                        }
+                    }
                 }
-            }
-            rv.Add(typeof(BotFeature), bot);
+
+            rv.Add(typeof(UnitFeature), unit);
         }
-        
-        // TODO: add units
 
         return rv;
     }

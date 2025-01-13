@@ -1,6 +1,4 @@
-﻿using HyperaiX.Abstractions.Messages;
-
-namespace HyperaiX.Extensions.QQ.Messages;
+﻿namespace HyperaiX.Extensions.QQ.Messages;
 
 public static class MessageEntityExtensions
 {

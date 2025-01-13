@@ -5,25 +5,15 @@ using HyperaiX.Middlewares;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 
 namespace HyperaiX.Services;
 
 public class HyperaiHostedService : IHostedService
 {
-    private class MiddlewareItem(MiddlewareBase middleware)
-    {
-        public MiddlewareItem? Next { get; set; }
-
-        public void Process(GenericEventArgs args) => middleware.Process(args, () => GoNext(args));
-
-        private void GoNext(GenericEventArgs args) => Next?.Process(args);
-    }
-
     private readonly IEndClient _client;
+    private readonly CancellationTokenSource _cts;
 
     private readonly MiddlewareItem _pipeline;
-    private readonly CancellationTokenSource _cts;
 
     public HyperaiHostedService(IServiceProvider provider, ModuleRegistry registry,
         IEndClient client,
@@ -63,6 +53,19 @@ public class HyperaiHostedService : IHostedService
         _cts = new CancellationTokenSource();
     }
 
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        await _client.ConnectAsync(cancellationToken);
+        _ = Task.Run(WorkAsync, CancellationToken.None);
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await _client.DisconnectAsync(cancellationToken);
+        await _cts.CancelAsync();
+    }
+
     private async Task WorkAsync()
     {
         try
@@ -82,16 +85,18 @@ public class HyperaiHostedService : IHostedService
         }
     }
 
-
-    public async Task StartAsync(CancellationToken cancellationToken)
+    private class MiddlewareItem(MiddlewareBase middleware)
     {
-        await _client.ConnectAsync(cancellationToken);
-        _ = Task.Run(WorkAsync, CancellationToken.None);
-    }
+        public MiddlewareItem? Next { get; set; }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        await _client.DisconnectAsync(cancellationToken);
-        await _cts.CancelAsync();
+        public void Process(GenericEventArgs args)
+        {
+            middleware.Process(args, () => GoNext(args));
+        }
+
+        private void GoNext(GenericEventArgs args)
+        {
+            Next?.Process(args);
+        }
     }
 }

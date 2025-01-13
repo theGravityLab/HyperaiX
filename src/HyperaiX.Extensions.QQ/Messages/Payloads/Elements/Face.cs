@@ -2,4 +2,4 @@
 
 namespace HyperaiX.Extensions.QQ.Messages.Payloads.Elements;
 
-public record Face(): IMessageElement;
+public record Face : IMessageElement;

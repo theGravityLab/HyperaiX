@@ -2,4 +2,4 @@
 
 namespace HyperaiX.Extensions.QQ.Messages.Payloads;
 
-public record Video() : IMessagePayload;
+public record Video : IMessagePayload;

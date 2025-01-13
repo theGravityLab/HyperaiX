@@ -2,4 +2,4 @@
 
 namespace HyperaiX.Extensions.QQ.Messages.Payloads.Elements;
 
-public record AtAll() : IMessageElement;
+public record AtAll : IMessageElement;

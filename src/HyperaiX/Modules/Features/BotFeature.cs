@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using HyperaiX.Abstractions.Bots;
+﻿using HyperaiX.Abstractions.Bots;
 
 namespace HyperaiX.Modules.Features;
 

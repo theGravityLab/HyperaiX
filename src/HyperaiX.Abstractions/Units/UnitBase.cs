@@ -1,6 +1,4 @@
-﻿using HyperaiX.Abstractions.Roles;
-
-namespace HyperaiX.Abstractions.Units;
+﻿namespace HyperaiX.Abstractions.Units;
 
 public abstract class UnitBase
 {

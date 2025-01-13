@@ -1,12 +1,12 @@
-﻿namespace HyperaiX.Abstractions.Units.Filters;
+﻿using System.Diagnostics.CodeAnalysis;
 
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-public class FilterAttribute : Attribute
+namespace HyperaiX.Abstractions.Units.Filters;
+
+public abstract class FilterAttribute : Attribute
 {
-    public virtual bool IsMatch(MessageContext context) => false;
-
-    public virtual void Process(MessageContext context)
+    public virtual bool IsMatched(MessageContext context, [MaybeNullWhen(false)] out object value)
     {
-        // TODO: 往 Duffet.BankBuilder 里丢东西
+        value = null;
+        return false;
     }
 }

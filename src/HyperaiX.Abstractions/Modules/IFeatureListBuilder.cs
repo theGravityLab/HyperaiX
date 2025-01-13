@@ -1,6 +1,8 @@
-﻿namespace HyperaiX.Abstractions.Modules;
+﻿using IBuilder;
 
-public interface IFeatureListBuilder : IBuilder.IBuilder<IReadOnlyDictionary<Type, object>>
+namespace HyperaiX.Abstractions.Modules;
+
+public interface IFeatureListBuilder : IBuilder<IReadOnlyDictionary<Type, object>>
 {
     void SetFeatureMark(string key, object value);
 }

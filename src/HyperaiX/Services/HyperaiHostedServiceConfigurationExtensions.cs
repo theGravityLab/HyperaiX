@@ -40,4 +40,10 @@ public static class HyperaiHostedServiceConfigurationExtensions
         self.Use<BotMiddleware>();
         return self;
     }
+
+    public static HyperaiHostedServiceConfiguration UseUnits(this HyperaiHostedServiceConfiguration self)
+    {
+        self.Use<UnitMiddleware>();
+        return self;
+    }
 }

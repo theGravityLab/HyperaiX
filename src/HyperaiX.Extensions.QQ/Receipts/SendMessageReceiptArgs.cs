@@ -2,4 +2,4 @@
 
 namespace HyperaiX.Extensions.QQ.Receipts;
 
-public record SendMessageReceiptArgs(string MessageId) : GenericReceiptArgs;
+public record SendMessageReceiptArgs(ulong Handle) : GenericReceiptArgs;

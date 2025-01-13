@@ -1,3 +1,3 @@
 ﻿namespace HyperaiX.Abstractions.Actions;
 
-public record GenericActionArgs();
+public record GenericActionArgs;

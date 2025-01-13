@@ -2,4 +2,4 @@
 
 namespace HyperaiX.Extensions.QQ.Messages.Payloads;
 
-public record Sticker() : IMessagePayload;
+public record Sticker : IMessagePayload;

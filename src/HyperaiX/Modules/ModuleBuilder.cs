@@ -1,9 +1,16 @@
-﻿namespace HyperaiX.Modules;
+﻿using IBuilder;
 
-public class ModuleBuilder : IBuilder.IBuilder<Module>
+namespace HyperaiX.Modules;
+
+public class ModuleBuilder : IBuilder<Module>
 {
-    private string _key = string.Empty;
     private Dictionary<Type, object> _features = new();
+    private string _key = string.Empty;
+
+    public Module Build()
+    {
+        return new Module(_key, _features);
+    }
 
     public ModuleBuilder WithKey(string key)
     {
@@ -21,10 +28,5 @@ public class ModuleBuilder : IBuilder.IBuilder<Module>
     {
         _features = features.ToDictionary();
         return this;
-    }
-
-    public Module Build()
-    {
-        return new Module(_key, _features);
     }
 }

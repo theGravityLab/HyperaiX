@@ -2,4 +2,4 @@
 
 namespace HyperaiX.Extensions.QQ.Messages.Payloads;
 
-public record Audio() : IMessagePayload;
+public record Audio : IMessagePayload;

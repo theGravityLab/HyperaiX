@@ -2,4 +2,4 @@
 
 namespace HyperaiX.Extensions.QQ.Roles;
 
-public record Guild(): IChat;
+public record Guild : IChat;
