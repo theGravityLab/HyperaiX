@@ -4,13 +4,14 @@ using IBuilder;
 
 namespace HyperaiX.Abstractions.Messages.Builders;
 
-public class RichContentBuilder : IBuilder<IMessagePayload>
+public class RichContentBuilder(MessageEntityBuilder builder) : IBuilder<MessageEntity>
 {
     private readonly List<IMessageElement> _elements = [];
 
-    public IMessagePayload Build()
+    public MessageEntity Build()
     {
-        return new RichContent(_elements);
+        builder.WithPayload(new RichContent(_elements));
+        return builder.Build();
     }
 
     public RichContentBuilder AddElement(IMessageElement element)

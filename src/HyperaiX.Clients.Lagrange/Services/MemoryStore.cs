@@ -12,7 +12,7 @@ public class MemoryStore(IMemoryCache cache)
 {
     public static readonly TimeSpan SlidingExpiration = TimeSpan.FromHours(12);
 
-    public async Task<Group> GetGroupAsync(ulong groupId, BotContext factory)
+    public async Task<Group> GetGroupAsync(uint groupId, BotGroup? reference, BotContext factory)
     {
         cache.TryGetValue<Group>(groupId, out var rv);
         if (rv != null) return rv;
@@ -28,31 +28,29 @@ public class MemoryStore(IMemoryCache cache)
             if (gen.Id == groupId) rv = gen;
         }
 
-        return rv ?? ModelHelper.ToGroup(groupId, null);
+        return rv ?? ModelHelper.ToGroup(groupId, reference);
     }
 
-    public async Task<Member> GetMemberAsync(ulong groupId, ulong memberId, BotGroupMember? reference,
+    public async Task<Member> GetMemberAsync(uint groupId, uint memberId, BotGroupMember? reference,
         BotContext factory)
     {
-        var group = await GetGroupAsync(groupId, factory);
+        var group = await GetGroupAsync(groupId, null, factory);
         var member = group.Members.FirstOrDefault(x => x.Id == memberId);
         return member ?? ModelHelper.ToMember(group, memberId, reference);
     }
 
-    public async Task<Friend> GetFriendAsync(ulong friendId, BotContext factory)
+    public async Task<Friend> GetFriendAsync(uint friendId, BotFriend? reference, BotContext factory)
     {
         cache.TryGetValue<Friend>(friendId, out var rv);
         if (rv != null) return rv;
 
         var friends = await factory.FetchFriends();
-        foreach (var friend in friends)
+        foreach (var gen in friends.Select(friend => ModelHelper.ToFriend(friend.Uin, friend)))
         {
-            var gen = ModelHelper.ToFriend(friend.Uin, friend);
-
             cache.Set(gen.Id, gen, SlidingExpiration);
             if (gen.Id == friendId) rv = gen;
         }
 
-        return rv ?? ModelHelper.ToFriend(friendId, null);
+        return rv ?? ModelHelper.ToFriend(friendId, reference);
     }
 }

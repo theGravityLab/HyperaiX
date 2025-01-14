@@ -1,16 +1,22 @@
-﻿using HyperaiX.Abstractions.Bots;
+﻿using System.Diagnostics;
+using HyperaiX.Abstractions.Bots;
 using HyperaiX.Abstractions.Events;
 using HyperaiX.Modules.Features;
 using HyperaiX.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace HyperaiX.Middlewares;
 
-public class BotMiddleware(IServiceProvider provider, ModuleRegistry registry) : MiddlewareBase
+public class BotMiddleware(IServiceProvider provider, ModuleRegistry registry, ILogger<BotMiddleware> logger)
+    : MiddlewareBase
 {
     public override void Process(GenericEventArgs args, Action next)
     {
         var features = registry.GetFeatures<BotFeature>();
+
+
+        var bots = new List<BotBase>();
 
         foreach (var feature in features)
         {
@@ -25,12 +31,26 @@ public class BotMiddleware(IServiceProvider provider, ModuleRegistry registry) :
             }
 
             foreach (var bot in feature.ActivatedBots)
-                Task.Run(async () => await bot.OnEventAsync(args)).ContinueWith(t =>
-                {
-                    // TODO: logging if faulted
-                });
+                bots.Add(bot);
         }
 
+        if (bots.Count != 0) _ = Task.Run(() => Emit(bots, args));
         next();
+    }
+
+    private Task Emit(IEnumerable<BotBase> bots, GenericEventArgs args)
+    {
+        var tasks = bots.Select(async x =>
+        {
+            try
+            {
+                await x.OnEventAsync(args);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "The bot {} has ran into exception", x.GetType().Name);
+            }
+        });
+        return Task.WhenAll(tasks);
     }
 }

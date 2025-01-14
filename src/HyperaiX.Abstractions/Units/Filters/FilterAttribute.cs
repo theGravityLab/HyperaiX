@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Duffet.Builders;
 
 namespace HyperaiX.Abstractions.Units.Filters;
 
 public abstract class FilterAttribute : Attribute
 {
-    public virtual bool IsMatched(MessageContext context, [MaybeNullWhen(false)] out object value)
+    public virtual bool IsMatched(MessageContext context, IBankBuilder bank)
     {
-        value = null;
         return false;
     }
 }

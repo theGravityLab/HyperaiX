@@ -151,9 +151,10 @@ public class LagrangeClient : IEndClient
 
     private void InvokerOnOnFriendMessageReceived(BotContext context, FriendMessageEvent e)
     {
-        var friend = _store.GetFriendAsync(e.Chain.FriendUin, _context).GetAwaiter().GetResult();
+        var friend = _store.GetFriendAsync(e.Chain.FriendUin, e.Chain.FriendInfo, _context).GetAwaiter().GetResult();
+        var self = _store.GetFriendAsync(context.BotUin, null, context).GetAwaiter().GetResult();
         var message = ModelHelper.ToMessage(e.Chain);
-        var evt = new MessageEventArgs(new Conversation(friend), friend, message);
+        var evt = new MessageEventArgs(new Conversation(friend), friend, self, message);
         _events.Writer.WriteAsync(evt);
     }
 
@@ -161,11 +162,14 @@ public class LagrangeClient : IEndClient
     {
         if (e.Chain is { GroupUin: not null })
         {
-            var group = _store.GetGroupAsync(e.Chain.GroupUin.Value, context).GetAwaiter().GetResult();
-            var member = _store.GetMemberAsync(group.Id, e.Chain.FriendUin, e.Chain.GroupMemberInfo, context)
+            var group = _store.GetGroupAsync(e.Chain.GroupUin.Value, null, context).GetAwaiter().GetResult();
+            var member = _store
+                .GetMemberAsync(e.Chain.GroupUin.Value, e.Chain.FriendUin, e.Chain.GroupMemberInfo, context)
                 .GetAwaiter().GetResult();
+            var self = _store.GetMemberAsync(e.Chain.GroupUin.Value, context.BotUin, null, context).GetAwaiter()
+                .GetResult();
             var message = ModelHelper.ToMessage(e.Chain);
-            var evt = new MessageEventArgs(group, member, message);
+            var evt = new MessageEventArgs(group, member, self, message);
             _events.Writer.WriteAsync(evt);
         }
     }

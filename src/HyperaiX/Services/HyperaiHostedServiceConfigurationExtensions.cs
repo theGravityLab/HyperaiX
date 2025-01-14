@@ -1,6 +1,9 @@
-﻿using HyperaiX.Abstractions.Modules;
+﻿using HyperaiX.Abstractions;
+using HyperaiX.Abstractions.Messages.Payloads;
+using HyperaiX.Abstractions.Modules;
 using HyperaiX.Middlewares;
 using HyperaiX.Modules;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HyperaiX.Services;
 
@@ -41,9 +44,12 @@ public static class HyperaiHostedServiceConfigurationExtensions
         return self;
     }
 
-    public static HyperaiHostedServiceConfiguration UseUnits(this HyperaiHostedServiceConfiguration self)
+    public static HyperaiHostedServiceConfiguration UseUnits(this HyperaiHostedServiceConfiguration self,
+        Action<UnitMiddlewareOptions>? configure = null)
     {
         self.Use<UnitMiddleware>();
+        self.Services.Configure<UnitMiddlewareOptions>(options => options.AddElementType(typeof(RichContent).Assembly));
+        if (configure != null) self.Services.Configure(configure);
         return self;
     }
 }

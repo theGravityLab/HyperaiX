@@ -18,7 +18,7 @@ public class ModuleFeatureListBuilder(Type module) : IFeatureListBuilder
         {
             var bot = new BotFeature();
             foreach (var type in module.Assembly.GetExportedTypes().Where(x =>
-                         x is { IsPublic: true, IsClass: true, IsAbstract: false } &&
+                         x is { IsPublic: true, IsClass: true, IsAbstract: false, IsNested: false } &&
                          x.IsAssignableTo(typeof(BotBase))))
                 if (type.FullName is not null && module.Namespace is not null &&
                     type.FullName.StartsWith(module.Namespace))
@@ -31,7 +31,7 @@ public class ModuleFeatureListBuilder(Type module) : IFeatureListBuilder
         {
             var unit = new UnitFeature();
             foreach (var type in module.Assembly.GetExportedTypes().Where(x =>
-                         x is { IsPublic: true, IsClass: true, IsAbstract: false } &&
+                         x is { IsPublic: true, IsClass: true, IsAbstract: false, IsNested: false } &&
                          x.IsAssignableTo(typeof(UnitBase))))
                 if (type.FullName is not null && module.Namespace is not null &&
                     type.FullName.StartsWith(module.Namespace))
