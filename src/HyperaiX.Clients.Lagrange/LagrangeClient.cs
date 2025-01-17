@@ -15,6 +15,7 @@ using Lagrange.Core.Common.Interface.Api;
 using Lagrange.Core.Event.EventArg;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using LogLevel = Lagrange.Core.Event.EventArg.LogLevel;
 
 namespace HyperaiX.Clients.Lagrange;
 
@@ -113,7 +114,12 @@ public class LagrangeClient : IEndClient
 
     public async ValueTask<GenericEventArgs> ReadAsync(CancellationToken token)
     {
-        if (await _events.Reader.WaitToReadAsync(token)) return await _events.Reader.ReadAsync(token);
+        if (await _events.Reader.WaitToReadAsync(token))
+        {
+            var evt = await _events.Reader.ReadAsync(token);
+            _logger.LogInformation("Inbound {}", evt);
+            return evt;
+        }
 
         throw new OperationCanceledException();
     }
@@ -121,6 +127,7 @@ public class LagrangeClient : IEndClient
     public async ValueTask<GenericReceiptArgs> WriteAsync(GenericActionArgs action, CancellationToken token = default)
     {
         if (token.IsCancellationRequested) await ValueTask.FromCanceled<GenericReceiptArgs>(token);
+        _logger.LogInformation("Outbound {}", action);
         switch (action)
         {
             case SendMessageActionArgs sendMessage:
@@ -141,6 +148,7 @@ public class LagrangeClient : IEndClient
 
     private void InvokerOnOnBotLogEvent(BotContext context, BotLogEvent e)
     {
+        if (e.Level == LogLevel.Verbose) return;
         _logger.LogDebug("Bot ({}) {}: {}", e.Level, e.Tag, e.EventMessage);
     }
 

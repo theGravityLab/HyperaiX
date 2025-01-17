@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Duffet.Builders;
+using HyperaiX.Abstractions.Messages.Payloads;
 using HyperaiX.Abstractions.Messages.Payloads.Elements;
 
 namespace HyperaiX.Abstractions.Units.Filters;
@@ -19,10 +20,12 @@ public class ExtractAttribute : FilterAttribute
     private record ElementMatcher(string? Key, string TypeName) : MatcherBase();
 
     private readonly IReadOnlyList<MatcherBase> _pattern;
+    private readonly bool _trammingSpaces;
 
-    public ExtractAttribute(string pattern, bool trimmingSpaces = false)
+    public ExtractAttribute(string pattern, bool trimmingSpaces = true)
     {
         _pattern = BuildPattern(pattern);
+        _trammingSpaces = trimmingSpaces;
     }
 
     private IReadOnlyList<MatcherBase> BuildPattern(string pattern)
@@ -215,7 +218,7 @@ public class ExtractAttribute : FilterAttribute
             }
         }
 
-        if (last < pattern.Length - 1)
+        if (last < pattern.Length)
         {
             plain.Append(pattern[last..]);
             list.Add(new PlainMatcher(plain.ToString()));
@@ -223,5 +226,222 @@ public class ExtractAttribute : FilterAttribute
         }
 
         return list;
+    }
+
+    public override bool IsMatched(MessageContext context, IBankBuilder bank)
+    {
+        return context.Message is { Body: RichContent content } && Walk(bank, _pattern, content.Elements, 0, 0);
+    }
+
+    private bool Walk(IBankBuilder bank, IReadOnlyList<MatcherBase> matchers, IReadOnlyList<IMessageElement> elements,
+        int mIndex, int eIndex, int tIndex = 0)
+    {
+        // Text("!at ") -Plain("!at ")
+        // At() -At()
+        // Text(" Ad astra! Or something else.")
+        // -EaterAll           -Plain("something else.")
+        
+        // 刚好一起结束，末尾元素同时被处理掉，则短路返回成功
+        if (mIndex == matchers.Count && (eIndex == elements.Count ||
+                                         (eIndex == elements.Count - 1 && elements[eIndex] is Text roll &&
+                                          tIndex == roll.Plain.Length))) return true;
+        // 有参数不合理立即返回失败结果
+        if (mIndex >= matchers.Count || eIndex >= elements.Count ||
+            (tIndex != 0 && elements[eIndex] is Text never && tIndex >= never.Plain.Length)) return false;
+
+        switch (matchers[mIndex])
+        {
+            case PlainMatcher plain:
+            {
+                var e = eIndex;
+                var t = tIndex;
+                foreach (var c in plain.Plain)
+                {
+                    if (e < elements.Count)
+                    {
+                        if (elements[e] is Text text)
+                        {
+                            if (t < text.Plain.Length)
+                            {
+                                if (text.Plain[t] == c)
+                                {
+                                    if (_trammingSpaces && text.Plain[t] == ' ')
+                                    {
+                                        // 步进到空格结束
+                                        while (e < elements.Count && elements[e] is Text gonna)
+                                        {
+                                            if (t < gonna.Plain.Length)
+                                            {
+                                                if (gonna.Plain[t] == ' ') t++;
+                                                else break;
+                                            }
+                                            else
+                                            {
+                                                e++;
+                                                t = 0;
+                                            }
+                                        }
+                                    }
+                                    else if (_trammingSpaces && text.Plain[t] == '\n')
+                                    {
+                                        // 步进到换行结束
+                                        while (e < elements.Count && elements[e] is Text gonna)
+                                        {
+                                            if (t < gonna.Plain.Length)
+                                            {
+                                                if (gonna.Plain[t] == '\n') t++;
+                                                else break;
+                                            }
+                                            else
+                                            {
+                                                e++;
+                                                t = 0;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        t++;
+                                    }
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                e++;
+                                t = 0;
+                            }
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                return Walk(bank, matchers, elements, mIndex + 1, e, t);
+            }
+            case EaterMatcher:
+            case TextMatcher:
+            {
+                if (elements[eIndex] is Text text)
+                {
+                    // 文本和文本匹配器都位于最后，则短路返回成功
+                    if (mIndex == matchers.Count - 1 && eIndex == elements.Count - 1)
+                    {
+                        if (matchers[mIndex] is TextMatcher { Key: { } key })
+                        {
+                            bank.Property().Named(key).Typed(typeof(string)).WithObject(text.Plain[tIndex..]);
+                        }
+
+                        return true;
+                    }
+
+                    var e = eIndex;
+                    var t = tIndex;
+                    while (e < elements.Count)
+                    {
+                        if (Walk(bank, matchers, elements, mIndex + 1, e, t))
+                        {
+                            if (matchers[mIndex] is TextMatcher { Key: { } key })
+                            {
+                                if (eIndex == e)
+                                {
+                                    bank.Property().Named(key).Typed(typeof(string)).WithObject(text.Plain[tIndex..t]);
+                                }
+                                else
+                                {
+                                    var sb = new StringBuilder();
+                                    // ([eIndex]Text)[tIndex]..([e]Text)[t]
+                                    sb.Append(text.Plain[tIndex..]);
+                                    for (var i = eIndex + 1; i < e; i++)
+                                    {
+                                        if (elements[i] is Text give)
+                                        {
+                                            sb.Append(give.Plain);
+                                        }
+                                    }
+
+                                    if (elements[e] is Text you)
+                                    {
+                                        sb.Append(you.Plain[..t]);
+                                    }
+
+                                    bank.Property().Typed(typeof(string)).WithObject(sb.ToString());
+                                }
+                            }
+
+                            return true;
+                        }
+
+                        if (elements[e] is not Text)
+                        {
+                            // 剪枝: 匹配失败，并且已经遇到非文本类型，那么即使之后匹配成功也会出现非文本结果
+                            return false;
+                        }
+
+                        if (elements[e] is Text up && t < up.Plain.Length)
+                        {
+                            t++;
+                        }
+                        else
+                        {
+                            e++;
+                            t = 0;
+                        }
+                    }
+                }
+
+                return false;
+            }
+            case EaterAllMatcher:
+            {
+                // 如果位于结尾则短路返回成功
+                if (mIndex == matchers.Count - 1) return true;
+
+                var e = eIndex;
+                var t = tIndex;
+                while (e < elements.Count)
+                {
+                    if (Walk(bank, matchers, elements, mIndex + 1, e, t))
+                    {
+                        return true;
+                    }
+
+                    if (elements[e] is Text text && t < text.Plain.Length)
+                    {
+                        t++;
+                    }
+                    else
+                    {
+                        e++;
+                        t = 0;
+                    }
+                }
+
+                return false;
+            }
+            case ElementMatcher generic:
+            {
+                if (generic.TypeName == elements[eIndex].GetType().Name)
+                {
+                    if (generic.Key is not null)
+                        bank.Property().Named(generic.Key).Typed(elements[eIndex].GetType())
+                            .WithObject(elements[eIndex]);
+                    return Walk(bank, matchers, elements, mIndex + 1, eIndex + 1);
+                }
+
+                return false;
+            }
+            default:
+                throw new NotImplementedException($"{matchers[mIndex].GetType().Name} not implemented");
+        }
     }
 }

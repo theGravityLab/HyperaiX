@@ -5,6 +5,7 @@ using HyperaiX.Middlewares;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace HyperaiX.Services;
 
@@ -12,14 +13,16 @@ public class HyperaiHostedService : IHostedService
 {
     private readonly IEndClient _client;
     private readonly CancellationTokenSource _cts;
+    private readonly ILogger _logger;
 
     private readonly MiddlewareItem _pipeline;
 
     public HyperaiHostedService(IServiceProvider provider, ModuleRegistry registry,
         IEndClient client,
-        HyperaiHostedServiceConfiguration configuration)
+        HyperaiHostedServiceConfiguration configuration, ILogger<HyperaiHostedService> logger)
     {
         _client = client;
+        _logger = logger;
 
         #region Build Pipeline
 

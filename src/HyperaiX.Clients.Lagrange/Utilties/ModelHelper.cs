@@ -107,7 +107,7 @@ public static class ModelHelper
                         }
                         case At at:
                         {
-                            builder.Mention((uint)at.MemberId, at.Display);
+                            builder.Mention((uint)at.MemberId, $"@{at.Display}");
                             break;
                         }
                     }

@@ -26,9 +26,9 @@ public static class HyperaiHostedServiceConfigurationExtensions
         return self;
     }
 
-    public static HyperaiHostedServiceConfiguration UseLogging(this HyperaiHostedServiceConfiguration self)
+    public static HyperaiHostedServiceConfiguration UseErrorLogging(this HyperaiHostedServiceConfiguration self)
     {
-        self.Use<LoggingMiddleware>();
+        self.Use<ErrorLoggingMiddleware>();
         return self;
     }
 

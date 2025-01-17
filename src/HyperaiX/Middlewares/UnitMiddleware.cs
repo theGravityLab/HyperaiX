@@ -35,7 +35,7 @@ public class UnitMiddleware(
             foreach (var action in feature.Actions)
             {
                 var filters = action.Action.GetCustomAttributes(typeof(FilterAttribute), false);
-                var builder = new LazyBankBuilder();
+                var builder = new BankBuilder();
                 var pass = true;
                 foreach (var obj in filters)
                     if (obj is FilterAttribute filter)
