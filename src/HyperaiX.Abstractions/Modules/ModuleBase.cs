@@ -12,7 +12,9 @@ public abstract class ModuleBase
 
     public virtual string Key { get; }
 
-    public abstract void ConfigureServices(IServiceCollection services, IConfiguration configuration);
+    public virtual void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    {
+    }
 
     public virtual void ConfigureFeatures(IFeatureListBuilder builder)
     {

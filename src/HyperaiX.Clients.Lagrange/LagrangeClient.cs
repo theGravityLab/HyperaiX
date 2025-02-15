@@ -6,6 +6,7 @@ using HyperaiX.Abstractions.Events;
 using HyperaiX.Abstractions.Receipts;
 using HyperaiX.Clients.Lagrange.Services;
 using HyperaiX.Clients.Lagrange.Utilties;
+using HyperaiX.Extensions.QQ.Actions;
 using HyperaiX.Extensions.QQ.Receipts;
 using HyperaiX.Extensions.QQ.Roles;
 using Lagrange.Core;
@@ -138,12 +139,18 @@ public class LagrangeClient : IEndClient
                     // MessageId 的类型是 Client 的属性，由 Client 确定而非 Extension，这里应该返回更为一般且由 HyperaiX.Abstractions 做去平台化 HashCode 类型的 Handle
                     // 在拉格朗日中 Handle 类型为 ulong，且就是 Sequence，需要在发送时转换为 Sequence，接受时提取自 Sequence 不做类型转换
                     return new SendMessageReceiptArgs(seq.Value);
-
-                throw new NotImplementedException("Should throw or just return ErrorReceiptArgs?");
+                break;
             }
-            default:
-                return new GenericReceiptArgs();
+            case ChangeMemberNicknameActionArgs changeMemberNickname:
+            {
+                await _context.RenameGroupMember((uint)changeMemberNickname.Member.Group.Id,
+                    (uint)changeMemberNickname.Member.Id,
+                    changeMemberNickname.Nickname);
+                break;
+            }
         }
+
+        return new GenericReceiptArgs();
     }
 
     private void InvokerOnOnBotLogEvent(BotContext context, BotLogEvent e)

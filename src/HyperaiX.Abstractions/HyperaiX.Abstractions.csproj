@@ -8,8 +8,8 @@
 
     <ItemGroup>
         <PackageReference Include="IBuilder" Version="0.3.0"/>
-        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.1" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
     </ItemGroup>
 
     <ItemGroup>

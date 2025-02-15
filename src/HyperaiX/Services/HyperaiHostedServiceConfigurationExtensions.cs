@@ -48,7 +48,6 @@ public static class HyperaiHostedServiceConfigurationExtensions
         Action<UnitMiddlewareOptions>? configure = null)
     {
         self.Use<UnitMiddleware>();
-        self.Services.Configure<UnitMiddlewareOptions>(options => options.AddElementType(typeof(RichContent).Assembly));
         if (configure != null) self.Services.Configure(configure);
         return self;
     }
